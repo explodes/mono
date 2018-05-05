@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package scratch;
+
+import "scratch/proto/sample.proto";
+
+service ContentService {
+    rpc Get(ContentRequest) returns (ContentResponse);
+    rpc Streaming(ContentRequest) returns (stream Content);
+}
+
+message ContentRequest {
+    // empty!
+}
+
+message ContentResponse {
+    repeated Content contents = 1;
+}

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package spacefight;
+
+import "proto/spacefight/spacefight.proto";
+
+service Spacefight {
+    rpc Login(Registration) returns (Token);
+    rpc Update(stream PlayerInput) returns (stream World);
+}
+
+message Registration {
+    string name = 1;
+}
+
+message Token {
+    string token = 1;
+}

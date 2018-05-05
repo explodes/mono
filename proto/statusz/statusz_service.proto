@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package statusz;
+
+import "proto/common/empty.proto";
+import "proto/statusz/statusz.proto";
+
+service Statusz {
+    rpc Poll(commonpb.Empty) returns (Status);
+}

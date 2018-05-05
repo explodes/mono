@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package statusz;
+
+message Memory {
+    int64 process_memory = 1;
+    int64 system_memory = 2;
+    int64 system_total = 3;
+}
+
+message Status {
+    int64 timestamp = 1;
+    Memory memory = 3;
+}
+

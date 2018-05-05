@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package spacefight;
+
+import "proto/game/physics.proto";
+
+message Ship {
+    game.Body body = 1;
+}
+
+message Color {
+    int64 aarrggbb = 1;
+}
+
+message Player {
+    int64 id = 1;
+    string username = 2;
+    Color color = 3;
+    Ship ship = 4;
+    bool new = 5;
+}
+
+message Bullet {
+    int64 id = 1;
+    int64 player_id = 2;
+    game.Body body = 3;
+    float lifespan = 4;
+    Color color = 5;
+}
+
+message World {
+    repeated Player players = 1;
+    repeated Bullet bullets = 2;
+    repeated game.Vector explosions = 3;
+}
+
+message PlayerInput {
+    string token = 1;
+    string username = 2;
+    bool rotate_left = 3;
+    bool rotate_right = 4;
+    bool thrust = 5;
+    bool fire = 6; 
+    bool quit = 7;
+}

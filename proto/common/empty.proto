@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+package commonpb;
+
+message Empty{} // intentionally left empty
