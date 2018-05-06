@@ -35,6 +35,7 @@ cc_library(
         ":elements",
         ":physics",
         "//hoist:clock",
+        "//hoist:likely",
         "//hoist:logging",
         "//hoist:math",
         "//proto/spacefight:spacefight_cc_pb",

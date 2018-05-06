@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <chrono>
 #include <mutex>
+#include "hoist/likely.h"
 #include "hoist/logging.h"
 #include "hoist/math.h"
 #include "webs/spacefight/color.h"
@@ -94,7 +95,7 @@ void Game::apply(const PlayerInput* const input) {
         }
       }
     }
-    DLOG("There " << (world_.players_size() == 1 ? "is" : "are") << " now "
+    ILOG("There " << (world_.players_size() == 1 ? "is" : "are") << " now "
                   << world_.players_size() << " "
                   << (world_.players_size() == 1 ? "player" : "players")
                   << " playing.");
@@ -105,7 +106,7 @@ void Game::apply(const PlayerInput* const input) {
   Player* player(nullptr);
   auto search = tokens_.find(input->token());
   if (search == tokens_.end()) {
-    DLOG("new player " << input->username());
+    ILOG("new player " << input->username());
     // Create a player.
     player = world_.add_players();
     Ship* ship = player->mutable_ship();
@@ -120,7 +121,7 @@ void Game::apply(const PlayerInput* const input) {
     phys::set(body->mutable_size(), 50, 50);
     phys::set(body->mutable_rotation(), physics->vel());
     tokens_[input->token()] = player;
-    DLOG("There " << (world_.players_size() == 1 ? "is" : "are") << " now "
+    ILOG("There " << (world_.players_size() == 1 ? "is" : "are") << " now "
                   << world_.players_size() << " "
                   << (world_.players_size() == 1 ? "player" : "players")
                   << " playing.");
@@ -165,17 +166,15 @@ void Game::update() {
       Player* player = world_.mutable_players(pi);
       PlayerState& state = player_states_[player];
       // if player isn't "invincible" because they're dead or new
-      if (state.isNew() && state.isDead()) {
-        DLOG("isDead=" << state.isDead() << " isNew=" << state.isNew());
+      if (UNLIKELY(state.isNew() && state.isDead())) {
         continue;
       }
       // if it isn't friendly fire and it collides with us...
-      if (bullet.player_id() == player->id()) {
-        DLOG("Friendly fire: " << player->username());
+      if (UNLIKELY(bullet.player_id() == player->id())) {
         continue;
       }
       if (phys::willCollide(player->ship().body(), bullet.body(), dt)) {
-        DLOG("player " << player->username() << " was shot!");
+        ILOG("player " << player->username() << " was shot!");
         // remove bullet
         world_.mutable_bullets()->DeleteSubrange(bi, 1);
         bi--;

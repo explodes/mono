@@ -43,6 +43,14 @@ cc_library(
 )
 
 cc_library(
+    name = "likely",
+    hdrs = ["likely.h"],
+    deps = [
+        ":portability",
+    ],
+)
+
+cc_library(
     name = "logging",
     srcs = [],
     hdrs = ["logging.h"],
@@ -52,4 +60,9 @@ cc_library(
     name = "math",
     srcs = ["math.cc"],
     hdrs = ["math.h"],
+)
+
+cc_library(
+    name = "portability",
+    hdrs = ["portability.h"],
 )
