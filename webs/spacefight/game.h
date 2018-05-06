@@ -13,11 +13,11 @@ class Game final {
  public:
   Game() : Game(std::make_shared<Hoist::SystemClock>()) {}
   explicit Game(std::shared_ptr<Hoist::Clock> clock)
-      : started_(false),
-        bullet_id_(0),
-        player_id_(0),
+      : clock_(clock),
         last_update_(0),
-        clock_(clock) {}
+        started_(false),
+        bullet_id_(0),
+        player_id_(0) {}
 
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
@@ -25,7 +25,7 @@ class Game final {
   void start();
   void end();
 
-  void apply(const std::string& token, const PlayerInput* const input);
+  void apply(const PlayerInput* const input);
   void getWorld(World* world);
 
   void update();
@@ -34,6 +34,17 @@ class Game final {
   struct PlayerState {
     PlayerInput input;
     float fire_delay;
+    // countdown for how long a player is new
+    float new_countdown;
+    // countdown until a player respawns
+    float dead_countdown;
+
+    bool isNew() { return new_countdown > 0; }
+    bool isDead() { return dead_countdown > 0; }
+    void update(float dt) {
+      new_countdown -= dt;
+      dead_countdown -= dt;
+    }
   };
   mutable std::shared_timed_mutex mutex_;
   std::shared_ptr<Hoist::Clock> clock_;

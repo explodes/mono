@@ -42,7 +42,7 @@ grpc::Status SpacefightService::Update(
         DLOG("read ended");
         return;
       }
-      game_.apply(input.token(), &input);
+      game_.apply(&input);
       if (input.quit()) {
         ok = false;
         DLOG("client quit");
@@ -60,13 +60,15 @@ grpc::Status SpacefightService::Update(
       DLOG("write ended");
       break;
     }
-    std::this_thread::sleep_for(world_update_interval);
+    std::this_thread::sleep_for(settings::world_update_interval);
   }
 
   input_thread.join();
 
   input.set_quit(true);
-  game_.apply(input.token(), &input);
+  if (!input.token().empty()) {
+    game_.apply(&input);
+  }
 
   return grpc::Status::OK;
 }

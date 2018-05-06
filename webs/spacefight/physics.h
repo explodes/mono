@@ -57,6 +57,7 @@ void update(game::Physics* p, const float dt);
 
 void update(game::Body* b, const float dt);
 bool willCollide(const game::Body& a, const game::Body& b, const float dt);
+bool doesCollide(const game::Body& a, const game::Body& b);
 
 }  // namespace phys
 }  // namespace spacefight

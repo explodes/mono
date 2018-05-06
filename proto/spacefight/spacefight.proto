@@ -17,7 +17,8 @@ message Player {
     string username = 2;
     Color color = 3;
     Ship ship = 4;
-    bool new = 5;
+    bool is_new = 5;
+    bool is_dead = 6;
 }
 
 message Bullet {
