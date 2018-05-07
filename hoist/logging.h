@@ -75,7 +75,7 @@ static std::mutex log_mutex;
 #include <iostream>
 
 static inline char* timenow() {
-  static char buffer[23];
+  static char buffer[24];
   static int millisec;
   static struct tm* tm_info;
   static struct timeval tv;
