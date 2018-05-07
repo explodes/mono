@@ -166,7 +166,7 @@ void Game::update() {
       Player* player = world_.mutable_players(pi);
       PlayerState& state = player_states_[player];
       // if player isn't "invincible" because they're dead or new
-      if (UNLIKELY(state.isNew() && state.isDead())) {
+      if (UNLIKELY(state.isNew() || state.isDead())) {
         continue;
       }
       // if it isn't friendly fire and it collides with us...
