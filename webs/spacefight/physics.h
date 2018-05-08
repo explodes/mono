@@ -55,8 +55,11 @@ void update(game::Physics* p, const float dt);
 
 // Body functions
 
+// apply velocity and acceleration for a given time interval
 void update(game::Body* b, const float dt);
+// test to see if two bodies will intersect in dt seconds
 bool willCollide(const game::Body& a, const game::Body& b, const float dt);
+// test to see if two bodies intersect
 bool doesCollide(const game::Body& a, const game::Body& b);
 
 }  // namespace phys

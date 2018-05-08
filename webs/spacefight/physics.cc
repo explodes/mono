@@ -87,13 +87,13 @@ bool willCollide(const game::Body& a, const game::Body& b, const float dt) {
   float ax1 = a.phys().pos().x() + a.phys().vel().x() * dt;
   float ay1 = a.phys().pos().y() + a.phys().vel().y() * dt;
   float ax2 = ax1 + a.size().x();
-  float ay2 = ax1 + a.size().y();
+  float ay2 = ay1 + a.size().y();
 
   // future b-rectangle
   float bx1 = b.phys().pos().x() + b.phys().vel().x() * dt;
   float by1 = b.phys().pos().y() + b.phys().vel().y() * dt;
   float bx2 = bx1 + b.size().x();
-  float by2 = bx1 + b.size().y();
+  float by2 = by1 + b.size().y();
 
   // collision detection
   if (ax1 > bx2 || bx1 > ax2) {
@@ -106,17 +106,15 @@ bool willCollide(const game::Body& a, const game::Body& b, const float dt) {
 }
 
 bool doesCollide(const game::Body& a, const game::Body& b) {
-  // future a-rectangle
   float ax1 = a.phys().pos().x() + a.phys().vel().x();
   float ay1 = a.phys().pos().y() + a.phys().vel().y();
   float ax2 = ax1 + a.size().x();
-  float ay2 = ax1 + a.size().y();
+  float ay2 = ay1 + a.size().y();
 
-  // future b-rectangle
   float bx1 = b.phys().pos().x() + b.phys().vel().x();
   float by1 = b.phys().pos().y() + b.phys().vel().y();
   float bx2 = bx1 + b.size().x();
-  float by2 = bx1 + b.size().y();
+  float by2 = by1 + b.size().y();
 
   // collision detection
   if (ax1 > bx2 || bx1 > ax2) {
