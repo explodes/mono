@@ -8,11 +8,12 @@ namespace spacefight {
 namespace settings {
 static constexpr int world_width = 800;
 static constexpr int world_height = 600;
-static constexpr std::chrono::milliseconds world_update_interval(13);
-static constexpr std::chrono::milliseconds game_update_interval(13);
+static constexpr std::chrono::milliseconds world_update_interval(26);
+static constexpr std::chrono::milliseconds game_update_interval(26);
 }  // namespace settings
 
 namespace ships {
+static constexpr float size = 50.0f;
 static constexpr float thrust = 5000.0f;
 static constexpr float max_vel = 50.0f;
 static constexpr float max_acc = 10.0f;
@@ -27,6 +28,11 @@ static constexpr float size = 10.0f;
 static constexpr float vel = 320.0f;
 static constexpr float lifespan = 2;
 }  // namespace bullets
+
+namespace explosions {
+static constexpr float size = 50.0f;
+static constexpr float lifespan = 4;
+}  // namespace explosions
 
 }  // namespace spacefight
 

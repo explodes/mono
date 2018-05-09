@@ -29,10 +29,18 @@ message Bullet {
     Color color = 5;
 }
 
+message Explosion {
+    int64 id = 1;
+    int64 player_id = 2;
+    game.Body body = 3;
+    float lifespan = 4;
+    Color color = 5;
+}
+
 message World {
     repeated Player players = 1;
     repeated Bullet bullets = 2;
-    repeated game.Vector explosions = 3;
+    repeated Explosion explosions = 3;
 }
 
 message PlayerInput {

@@ -17,7 +17,8 @@ class Game final {
         last_update_(0),
         started_(false),
         bullet_id_(0),
-        player_id_(0) {}
+        player_id_(0),
+        explosion_id_(0) {}
 
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
@@ -50,11 +51,12 @@ class Game final {
   std::shared_ptr<Hoist::Clock> clock_;
   World world_;
   std::unordered_map<std::string, Player*> tokens_;
-  std::unordered_map<Player*, PlayerState> player_states_;
+  std::unordered_map<Player const*, PlayerState> player_states_;
   Hoist::nanos_t last_update_;
   bool started_;
   int64_t bullet_id_;
   int64_t player_id_;
+  int64_t explosion_id_;
   std::thread update_thread_;
 };
 

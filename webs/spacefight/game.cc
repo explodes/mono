@@ -118,7 +118,7 @@ void Game::apply(const PlayerInput* const input) {
     player->mutable_color()->set_aarrggbb(
         hsv2int64(hsv{Hoist::RNG::roll() * 360.0, 1, 1}));
     phys::set(physics, 400, 300, -1, 0);
-    phys::set(body->mutable_size(), 50, 50);
+    phys::set(body->mutable_size(), ships::size, ships::size);
     phys::set(body->mutable_rotation(), physics->vel());
     tokens_[input->token()] = player;
     ILOG("There " << (world_.players_size() == 1 ? "is" : "are") << " now "
@@ -163,24 +163,48 @@ void Game::update() {
   for (int bi = 0; bi < world_.bullets_size(); bi++) {
     const Bullet& bullet = world_.bullets(bi);
     for (int pi = 0; pi < world_.players_size(); pi++) {
-      Player* player = world_.mutable_players(pi);
-      PlayerState& state = player_states_[player];
+      const Player& player = world_.players(pi);
+      PlayerState& state = player_states_[&player];
       // if player isn't "invincible" because they're dead or new
       if (UNLIKELY(state.isNew() || state.isDead())) {
         continue;
       }
       // if it isn't friendly fire and it collides with us...
-      if (UNLIKELY(bullet.player_id() == player->id())) {
+      if (UNLIKELY(bullet.player_id() == player.id())) {
         continue;
       }
-      if (phys::willCollide(player->ship().body(), bullet.body(), dt)) {
-        ILOG("player " << player->username() << " was shot!");
+      if (phys::willCollide(player.ship().body(), bullet.body(), dt)) {
+        ILOG("player " << player.username() << " was shot!");
         // remove bullet
         world_.mutable_bullets()->DeleteSubrange(bi, 1);
         bi--;
         // remove player temporarily
         state.dead_countdown = ships::respawn_time;
-        // TODO(explodes): create explosion
+        // create explosion
+        const Ship& player_ship = player.ship();
+        const game::Body& player_body = player_ship.body();
+        const game::Physics& player_physics = player_body.phys();
+        Explosion* explosion = world_.add_explosions();
+        game::Body* explosion_body = explosion->mutable_body();
+        game::Physics* explosion_physics = explosion_body->mutable_phys();
+        explosion->set_id(++explosion_id_);
+        explosion->set_player_id(player.id());
+        explosion->set_lifespan(explosions::lifespan);
+        explosion->mutable_color()->CopyFrom(player.color());
+        // set centered at player position
+        phys::set(explosion_physics->mutable_pos(),
+                  player_physics.pos().x() + player_body.size().x() * 0.5 -
+                      explosions::size * 0.5,
+                  player_physics.pos().y() + player_body.size().y() * 0.5 -
+                      explosions::size * 0.5);
+        // set velocity..
+        phys::set(explosion_physics->mutable_vel(), player_physics.vel());
+        // Bullet body
+        phys::set(explosion_body->mutable_size(), explosions::size,
+                  explosions::size);
+        phys::set(explosion_body->mutable_rotation(), explosion_physics->vel());
+        // stop this bullet loop
+        break;
       }
     }
   }
@@ -223,9 +247,10 @@ void Game::update() {
         bullet->set_lifespan(bullets::lifespan);
         bullet->mutable_color()->CopyFrom(player->color());
         // set centered at player position
-        phys::set(bullet_physics->mutable_pos(),
-                  physics->pos().x() + body->size().x() * 0.5,
-                  physics->pos().y() + body->size().y() * 0.5);
+        phys::set(
+            bullet_physics->mutable_pos(),
+            physics->pos().x() + body->size().x() * 0.5 - bullets::size * 0.5,
+            physics->pos().y() + body->size().y() * 0.5 - bullets::size * 0.5);
         // set velocity..
         phys::set(bullet_physics->mutable_vel(), bullets::vel, 0);
         // ..angled to face the same direction as the player
@@ -284,7 +309,20 @@ void Game::update() {
       continue;
     }
     // update bullet
-    phys::update(bullet->mutable_body()->mutable_phys(), dt);
+    phys::update(bullet->mutable_body(), dt);
+  }
+  // move explosions
+  for (int i = 0; i < world_.explosions_size(); i++) {
+    Explosion* explosion = world_.mutable_explosions(i);
+    // remove long-lived explosions
+    explosion->set_lifespan(explosion->lifespan() - dt);
+    if (explosion->lifespan() <= 0) {
+      world_.mutable_explosions()->DeleteSubrange(i, 1);
+      i--;
+      continue;
+    }
+    // update explosion
+    phys::update(explosion->mutable_body(), dt);
   }
 }
 
