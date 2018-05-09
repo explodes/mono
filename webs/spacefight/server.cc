@@ -16,6 +16,7 @@ void createAndRunSpacefight(spacefight::Game &game) {
   builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
   builder.RegisterService(&service);
   builder.RegisterService(&statusz);
+  builder.SetDefaultCompressionLevel(GRPC_COMPRESS_LEVEL_HIGH);
 
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
 
