@@ -70,33 +70,20 @@ void Game::apply(const PlayerInput* const input) {
     ELOG("game not started, cannot apply");
     return;
   }
-
   // if player quit, remove player
   if (input->quit()) {
     onQuit(input);
     return;
   }
-
-  // if token does not exist, create ship
-  Player* player(nullptr);
+  // update the input state
   auto search = tokens_.find(input->token());
-  if (search == tokens_.end()) {
-    ILOG("new player " << input->username());
-    // Create a player.
-    player = onNewPlayer(input);
-    tokens_[input->token()] = player;
-
-    PlayerState& state = player_states_[player];
-    // save input for update()
-    state.input.CopyFrom(*input);
-    // this is a new ship.
-    state.new_countdown = ships::new_invincibility_time;
-  } else {
-    player = search->second;
-    PlayerState& state = player_states_[player];
-    // save input for update()
-    state.input.CopyFrom(*input);
+  if (UNLIKELY(search == tokens_.end())) {
+    ELOG("missing player " << input->username());
+    return;
   }
+  Player* player = search->second;
+  PlayerState& state = player_states_[player];
+  state.input.CopyFrom(*input);
 }
 
 void Game::onQuit(const PlayerInput* const input) {
@@ -125,7 +112,13 @@ void Game::onQuit(const PlayerInput* const input) {
   logNumPlayers();
 }
 
-Player* Game::onNewPlayer(const PlayerInput* const input) {
+int64_t Game::createNewPlayer(const PlayerInput* const input) {
+  std::unique_lock<std::shared_timed_mutex> lock(mutex_);
+  if (!started_) {
+    ELOG("game not started, cannot createNewPlayer");
+    return -1;
+  }
+  DLOG("new player " << input->username());
   Player* player = world_.add_players();
   Ship* ship = player->mutable_ship();
   game::Body* body = ship->mutable_body();
@@ -138,8 +131,17 @@ Player* Game::onNewPlayer(const PlayerInput* const input) {
   phys::set(physics, 400, 300, -1, 0);
   phys::set(body->mutable_size(), ships::size, ships::size);
   phys::set(body->mutable_rotation(), physics->vel());
+
+  tokens_[input->token()] = player;
+
+  PlayerState& state = player_states_[player];
+  // save input for update()
+  state.input.CopyFrom(*input);
+  // this is a new ship.
+  state.new_countdown = ships::new_invincibility_time;
+
   logNumPlayers();
-  return player;
+  return player->id();
 }
 
 void Game::logNumPlayers() {

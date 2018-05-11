@@ -26,6 +26,8 @@ class Game final {
   void start();
   void end();
 
+  int64_t createNewPlayer(const PlayerInput* const input);
+
   void apply(const PlayerInput* const input);
   void getWorld(World* world);
 
@@ -64,7 +66,6 @@ class Game final {
 
   // Input sequence
   void onQuit(const PlayerInput* const input);
-  Player* onNewPlayer(const PlayerInput* const input);
 
   // Update sequence
   float computeTimeDelta();

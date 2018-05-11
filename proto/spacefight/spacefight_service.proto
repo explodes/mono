@@ -10,9 +10,10 @@ service Spacefight {
 }
 
 message Registration {
-    string name = 1;
+    string username = 1;
 }
 
 message Token {
     string token = 1;
+    int64 player_id = 2;
 }

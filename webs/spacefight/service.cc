@@ -12,7 +12,7 @@ namespace spacefight {
 grpc::Status SpacefightService::Login(grpc::ServerContext* context,
                                       const Registration* request,
                                       Token* response) {
-  DLOG("register " << request->name());
+  DLOG("register " << request->username());
 
   char token[65];
   for (int i = 0; i < 64; i++) {
@@ -22,7 +22,14 @@ grpc::Status SpacefightService::Login(grpc::ServerContext* context,
   std::string tokens(token);
   DLOG("create token " << tokens);
 
+  PlayerInput input;
+  input.set_token(tokens);
+  input.set_username(request->username());
+  int64_t player_id = game_.createNewPlayer(&input);
+
   response->set_token(tokens);
+  response->set_player_id(player_id);
+
   return grpc::Status::OK;
 };
 
