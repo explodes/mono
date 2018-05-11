@@ -58,6 +58,20 @@ class Game final {
   int64_t player_id_;
   int64_t explosion_id_;
   std::thread update_thread_;
+
+  // Status
+  void logNumPlayers();
+
+  // Input sequence
+  void onQuit(const PlayerInput* const input);
+  Player* onNewPlayer(const PlayerInput* const input);
+
+  // Update sequence
+  float computeTimeDelta();
+  void updateBulletCollisions(float dt);
+  void updateShips(float dt);
+  void updateBullets(float dt);
+  void updateExplosions(float dt);
 };
 
 }  // namespace spacefight

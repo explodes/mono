@@ -73,32 +73,7 @@ void Game::apply(const PlayerInput* const input) {
 
   // if player quit, remove player
   if (input->quit()) {
-    DLOG("token " << input->token() << " requesting quit");
-    auto search = tokens_.find(input->token());
-    if (search != tokens_.end()) {
-      Player* player = tokens_[input->token()];
-      ILOG("player " << player->username() << " quit.");
-
-      // remove player state
-      player_states_.erase(player);
-
-      // remove from tokens
-      tokens_.erase(input->token());
-
-      // finally remove from the world
-      for (int i = 0; i < world_.players_size(); i++) {
-        Player* other = world_.mutable_players(i);
-        if (player == other) {
-          world_.mutable_players()->DeleteSubrange(i, 1);
-          i--;
-          break;
-        }
-      }
-    }
-    ILOG("There " << (world_.players_size() == 1 ? "is" : "are") << " now "
-                  << world_.players_size() << " "
-                  << (world_.players_size() == 1 ? "player" : "players")
-                  << " playing.");
+    onQuit(input);
     return;
   }
 
@@ -108,23 +83,8 @@ void Game::apply(const PlayerInput* const input) {
   if (search == tokens_.end()) {
     ILOG("new player " << input->username());
     // Create a player.
-    player = world_.add_players();
-    Ship* ship = player->mutable_ship();
-    game::Body* body = ship->mutable_body();
-    game::Physics* physics = body->mutable_phys();
-    player->set_id(++player_id_);
-    player->set_username(input->username());
-    player->set_is_new(true);
-    player->mutable_color()->set_aarrggbb(
-        hsv2int64(hsv{Hoist::RNG::roll() * 360.0, 1, 1}));
-    phys::set(physics, 400, 300, -1, 0);
-    phys::set(body->mutable_size(), ships::size, ships::size);
-    phys::set(body->mutable_rotation(), physics->vel());
+    player = onNewPlayer(input);
     tokens_[input->token()] = player;
-    ILOG("There " << (world_.players_size() == 1 ? "is" : "are") << " now "
-                  << world_.players_size() << " "
-                  << (world_.players_size() == 1 ? "player" : "players")
-                  << " playing.");
 
     PlayerState& state = player_states_[player];
     // save input for update()
@@ -137,6 +97,56 @@ void Game::apply(const PlayerInput* const input) {
     // save input for update()
     state.input.CopyFrom(*input);
   }
+}
+
+void Game::onQuit(const PlayerInput* const input) {
+  DLOG("token " << input->token() << " requesting quit");
+  auto search = tokens_.find(input->token());
+  if (search != tokens_.end()) {
+    Player* player = tokens_[input->token()];
+    ILOG("player " << player->username() << " quit.");
+
+    // remove player state
+    player_states_.erase(player);
+
+    // remove from tokens
+    tokens_.erase(input->token());
+
+    // finally remove from the world
+    for (int i = 0; i < world_.players_size(); i++) {
+      Player* other = world_.mutable_players(i);
+      if (player == other) {
+        world_.mutable_players()->DeleteSubrange(i, 1);
+        i--;
+        break;
+      }
+    }
+  }
+  logNumPlayers();
+}
+
+Player* Game::onNewPlayer(const PlayerInput* const input) {
+  Player* player = world_.add_players();
+  Ship* ship = player->mutable_ship();
+  game::Body* body = ship->mutable_body();
+  game::Physics* physics = body->mutable_phys();
+  player->set_id(++player_id_);
+  player->set_username(input->username());
+  player->set_is_new(true);
+  player->mutable_color()->set_aarrggbb(
+      hsv2int64(hsv{Hoist::RNG::roll() * 360.0, 1, 1}));
+  phys::set(physics, 400, 300, -1, 0);
+  phys::set(body->mutable_size(), ships::size, ships::size);
+  phys::set(body->mutable_rotation(), physics->vel());
+  logNumPlayers();
+  return player;
+}
+
+void Game::logNumPlayers() {
+  int numPlayers = world_.players_size();
+  ILOG("There " << (numPlayers == 1 ? "is" : "are") << " now " << numPlayers
+                << " " << (numPlayers == 1 ? "player" : "players")
+                << " playing.");
 }
 
 void Game::getWorld(World* world) {
@@ -155,11 +165,21 @@ void Game::update() {
     return;
   }
 
+  float dt = computeTimeDelta();
+  updateBulletCollisions(dt);
+  updateShips(dt);
+  updateBullets(dt);
+  updateExplosions(dt);
+}
+
+float Game::computeTimeDelta() {
   Hoist::nanos_t now = clock_->nanos();
   float dt = nanosToSeconds(now - last_update_);
   last_update_ = now;
+  return dt;
+}
 
-  // create explosions
+void Game::updateBulletCollisions(float dt) {
   for (int bi = 0; bi < world_.bullets_size(); bi++) {
     const Bullet& bullet = world_.bullets(bi);
     for (int pi = 0; pi < world_.players_size(); pi++) {
@@ -208,7 +228,9 @@ void Game::update() {
       }
     }
   }
-  // update ships
+}
+
+void Game::updateShips(float dt) {
   for (int pi = 0; pi < world_.players_size(); pi++) {
     Player* player = world_.mutable_players(pi);
     Ship* ship = player->mutable_ship();
@@ -263,16 +285,13 @@ void Game::update() {
       // keep in bounds
       if (physics->pos().x() < 0) {
         physics->mutable_pos()->set_x(0);
-      } else if (physics->pos().x() + body->size().x() >
-                 settings::world_width) {
-        physics->mutable_pos()->set_x(settings::world_width - body->size().x());
+      } else if (physics->pos().x() + body->size().x() > world::width) {
+        physics->mutable_pos()->set_x(world::width - body->size().x());
       }
       if (physics->pos().y() < 0) {
         physics->mutable_pos()->set_y(0);
-      } else if (physics->pos().y() + body->size().y() >
-                 settings::world_height) {
-        physics->mutable_pos()->set_y(settings::world_height -
-                                      body->size().y());
+      } else if (physics->pos().y() + body->size().y() > world::height) {
+        physics->mutable_pos()->set_y(world::height - body->size().y());
       }
     }
     // STATE
@@ -297,7 +316,9 @@ void Game::update() {
     }
     player->set_is_new(isNew);
   }
-  // move bullets
+}
+
+void Game::updateBullets(float dt) {
   for (int i = 0; i < world_.bullets_size(); i++) {
     Bullet* bullet = world_.mutable_bullets(i);
     // remove long-lived bullets
@@ -310,7 +331,9 @@ void Game::update() {
     // update bullet
     phys::update(bullet->mutable_body(), dt);
   }
-  // move explosions
+}
+
+void Game::updateExplosions(float dt) {
   for (int i = 0; i < world_.explosions_size(); i++) {
     Explosion* explosion = world_.mutable_explosions(i);
     // remove long-lived explosions
