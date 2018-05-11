@@ -6,11 +6,14 @@
 namespace spacefight {
 
 namespace settings {
-static constexpr int world_width = 800;
-static constexpr int world_height = 600;
 static constexpr std::chrono::milliseconds world_update_interval(26);
 static constexpr std::chrono::milliseconds game_update_interval(26);
 }  // namespace settings
+
+namespace world {
+static constexpr int width = 800;
+static constexpr int height = 600;
+}  // namespace world
 
 namespace ships {
 static constexpr float size = 50.0f;

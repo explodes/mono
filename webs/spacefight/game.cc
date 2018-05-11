@@ -288,11 +288,10 @@ void Game::update() {
     }
     bool isNew = state.isNew();
     if (!wasNew && isNew) {
-      phys::set(physics->mutable_pos(),
-                Hoist::RNG::rand<float>(
-                    0.0f, settings::world_width - body->size().x()),
-                Hoist::RNG::rand<float>(
-                    0.0f, settings::world_height - body->size().y()));
+      phys::set(
+          physics->mutable_pos(),
+          Hoist::RNG::rand<float>(0.0f, world::width - body->size().x()),
+          Hoist::RNG::rand<float>(0.0f, world::height - body->size().y()));
       phys::rotate(body->mutable_rotation(),
                    Hoist::RNG::rand<float>(0, degToRad(360)));
     }
