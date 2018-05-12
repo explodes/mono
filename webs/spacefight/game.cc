@@ -284,6 +284,8 @@ void Game::updateShips(float dt) {
         // ..angled to face the same direction as the player
         phys::rotate(bullet_physics->mutable_vel(),
                      phys::angle(body->rotation()));
+        // ..plus the ships velocity
+        phys::add(bullet_physics->mutable_vel(), physics->mutable_vel());
         // Bullet body
         phys::set(bullet_body->mutable_size(), bullets::size, bullets::size);
         phys::set(bullet_body->mutable_rotation(), bullet_physics->vel());
