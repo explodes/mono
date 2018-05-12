@@ -12,6 +12,9 @@
 
 namespace spacefight {
 
+// forward decls
+void setRandomSpawnPosition(game::Vector* v);
+
 template <typename T>
 inline T max(T a, T b) {
   return a > b ? a : b;
@@ -128,9 +131,10 @@ int64_t Game::createNewPlayer(const PlayerInput* const input) {
   player->set_is_new(true);
   player->mutable_color()->set_aarrggbb(
       hsv2int64(hsv{Hoist::RNG::roll() * 360.0, 1, 1}));
-  phys::set(physics, 400, 300, -1, 0);
   phys::set(body->mutable_size(), ships::size, ships::size);
   phys::set(body->mutable_rotation(), physics->vel());
+  phys::reset(physics->mutable_vel());
+  setRandomSpawnPosition(physics->mutable_pos());
 
   tokens_[input->token()] = player;
 
@@ -284,17 +288,6 @@ void Game::updateShips(float dt) {
         phys::set(bullet_body->mutable_size(), bullets::size, bullets::size);
         phys::set(bullet_body->mutable_rotation(), bullet_physics->vel());
       }
-      // keep in bounds
-      if (physics->pos().x() < 0) {
-        physics->mutable_pos()->set_x(0);
-      } else if (physics->pos().x() + body->size().x() > world::width) {
-        physics->mutable_pos()->set_x(world::width - body->size().x());
-      }
-      if (physics->pos().y() < 0) {
-        physics->mutable_pos()->set_y(0);
-      } else if (physics->pos().y() + body->size().y() > world::height) {
-        physics->mutable_pos()->set_y(world::height - body->size().y());
-      }
     }
     // STATE
     bool wasNew = state.isNew();
@@ -309,10 +302,7 @@ void Game::updateShips(float dt) {
     }
     bool isNew = state.isNew();
     if (!wasNew && isNew) {
-      phys::set(
-          physics->mutable_pos(),
-          Hoist::RNG::rand<float>(0.0f, world::width - body->size().x()),
-          Hoist::RNG::rand<float>(0.0f, world::height - body->size().y()));
+      setRandomSpawnPosition(physics->mutable_pos());
       phys::rotate(body->mutable_rotation(),
                    Hoist::RNG::rand<float>(0, degToRad(360)));
     }
@@ -348,6 +338,11 @@ void Game::updateExplosions(float dt) {
     // update explosion
     phys::update(explosion->mutable_body(), dt);
   }
+}
+
+void setRandomSpawnPosition(game::Vector* v) {
+  phys::set(v, Hoist::RNG::roll() * world::spawn_radius, 0);
+  phys::rotate(v, Hoist::RNG::roll() * 2 * M_PI);
 }
 
 }  // namespace spacefight

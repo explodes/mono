@@ -11,8 +11,7 @@ static constexpr std::chrono::milliseconds game_update_interval(26);
 }  // namespace settings
 
 namespace world {
-static constexpr int width = 800;
-static constexpr int height = 600;
+static constexpr float spawn_radius = 10000;
 }  // namespace world
 
 namespace ships {
