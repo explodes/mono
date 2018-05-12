@@ -17,8 +17,8 @@ static constexpr float spawn_radius = 10000;
 namespace ships {
 static constexpr float size = 50.0f;
 static constexpr float thrust = 5000.0f;
-static constexpr float max_vel = 50.0f;
-static constexpr float max_acc = 10.0f;
+static constexpr float max_vel = 500.0f;
+static constexpr float max_acc = 100.0f;
 static constexpr float rotate_speed = degToRad(180);
 static constexpr float fire_rate = 0.66f;
 static constexpr float new_invincibility_time = 3.5f;
@@ -26,9 +26,9 @@ static constexpr float respawn_time = 4.0f;
 }  // namespace ships
 
 namespace bullets {
-static constexpr float size = 10.0f;
-static constexpr float vel = 320.0f;
-static constexpr float lifespan = 2;
+static constexpr float size = 7.0f;
+static constexpr float vel = 900.0f;
+static constexpr float lifespan = 1;
 }  // namespace bullets
 
 namespace explosions {
