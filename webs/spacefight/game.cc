@@ -41,7 +41,7 @@ void Game::start() {
   PlayerInput* leaked_input = new PlayerInput();
   leaked_input->set_username("gunther");
   leaked_input->set_token("tacobellisprettyok");
-  apply(leaked_input);
+  createNewPlayer(leaked_input);
 
   update_thread_ = std::thread([this]() {
     DLOG("update loop started");
