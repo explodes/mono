@@ -9,29 +9,43 @@
 
 namespace spacefight {
 
+#define WRITE_LOCKED
+#define READ_LOCKED
+
 class Game final {
  public:
   Game() : Game(std::make_shared<Hoist::SystemClock>()) {}
-  explicit Game(std::shared_ptr<Hoist::Clock> clock)
+  Game(std::shared_ptr<Hoist::Clock> clock, const int numBots = 15)
       : clock_(clock),
         last_update_(0),
         started_(false),
         bullet_id_(0),
         player_id_(0),
-        explosion_id_(0) {}
+        explosion_id_(0) {
+    for (int i = 0; i < numBots; i++) {
+      std::string name("gunther");
+      name.append(std::to_string(i));
+      std::string token("token");
+      token.append(std::to_string(i));
+      PlayerInput* leaked_input = new PlayerInput();
+      leaked_input->set_username(name);
+      leaked_input->set_token(token);
+      createNewAI(leaked_input);
+    }
+  }
 
   Game(const Game&) = delete;
   Game& operator=(const Game&) = delete;
 
-  void start();
-  void end();
+  WRITE_LOCKED void start();
+  WRITE_LOCKED void end();
 
-  int64_t createNewPlayer(const PlayerInput* const input);
+  WRITE_LOCKED int64_t createNewPlayer(const PlayerInput* const input);
 
-  void apply(const PlayerInput* const input);
-  void getWorld(World* world);
+  WRITE_LOCKED void apply(const PlayerInput* const input);
+  READ_LOCKED void getWorld(World* world);
 
-  void update();
+  WRITE_LOCKED void update();
 
  private:
   struct PlayerState {
@@ -49,11 +63,18 @@ class Game final {
       dead_countdown -= dt;
     }
   };
+  struct BotState {
+    float time;
+  };
+  typedef std::unique_lock<std::shared_timed_mutex> WriteLock;
+  typedef std::shared_lock<std::shared_timed_mutex> ReadLock;
   mutable std::shared_timed_mutex mutex_;
   std::shared_ptr<Hoist::Clock> clock_;
   World world_;
   std::unordered_map<std::string, Player*> tokens_;
   std::unordered_map<Player const*, PlayerState> player_states_;
+  std::unordered_map<Player const*, BotState> bot_states_;
+  std::vector<Player*> bots_;
   Hoist::nanos_t last_update_;
   bool started_;
   int64_t bullet_id_;
@@ -67,12 +88,19 @@ class Game final {
   // Input sequence
   void onQuit(const PlayerInput* const input);
 
+  void createNewAI(const PlayerInput* const input);
+  Player* createNewPlayerUnlocked(const PlayerInput* const input);
+  void applyUnlocked(const PlayerInput* const input);
+
   // Update sequence
   float computeTimeDelta();
   void updateBulletCollisions(float dt);
   void updateShips(float dt);
   void updateBullets(float dt);
   void updateExplosions(float dt);
+
+  // AI
+  void updateAI(float dt);
 };
 
 }  // namespace spacefight

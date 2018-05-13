@@ -29,9 +29,10 @@ float nanosToSeconds(Hoist::nanos_t nanos) {
   return static_cast<float>(nanos) / 1e9;
 }
 
-void Game::start() {
-  // TODO(explodes): remove dummy player hack
-  // std::unique_lock<std::shared_timed_mutex> lock(mutex_);
+// Game {
+
+WRITE_LOCKED void Game::start() {
+  WriteLock write_lock(mutex_);
   DLOG("Game.start()");
   if (started_) {
     ELOG("already started");
@@ -39,18 +40,6 @@ void Game::start() {
   }
   started_ = true;
   last_update_ = clock_->nanos();
-
-  // TODO(explodes): remove dummy player hack
-  for (int i = 0; i < 30; i++) {
-    std::string name("gunther");
-    name.append(std::to_string(i));
-    std::string token("token");
-    token.append(std::to_string(i));
-    PlayerInput* leaked_input = new PlayerInput();
-    leaked_input->set_username(name);
-    leaked_input->set_token(token);
-    createNewPlayer(leaked_input);
-  }
 
   update_thread_ = std::thread([this]() {
     DLOG("update loop started");
@@ -62,8 +51,8 @@ void Game::start() {
   });
 }
 
-void Game::end() {
-  std::unique_lock<std::shared_timed_mutex> lock(mutex_);
+WRITE_LOCKED void Game::end() {
+  WriteLock write_lock(mutex_);
   DLOG("Game.end()");
   if (!started_) {
     ELOG("not started");
@@ -73,12 +62,16 @@ void Game::end() {
   update_thread_.join();
 }
 
-void Game::apply(const PlayerInput* const input) {
-  std::unique_lock<std::shared_timed_mutex> lock(mutex_);
+WRITE_LOCKED void Game::apply(const PlayerInput* const input) {
+  WriteLock write_lock(mutex_);
   if (!started_) {
     ELOG("game not started, cannot apply");
     return;
   }
+  applyUnlocked(input);
+}
+
+void Game::applyUnlocked(const PlayerInput* const input) {
   // if player quit, remove player
   if (input->quit()) {
     onQuit(input);
@@ -121,12 +114,16 @@ void Game::onQuit(const PlayerInput* const input) {
   logNumPlayers();
 }
 
-int64_t Game::createNewPlayer(const PlayerInput* const input) {
-  std::unique_lock<std::shared_timed_mutex> lock(mutex_);
+WRITE_LOCKED int64_t Game::createNewPlayer(const PlayerInput* const input) {
+  WriteLock write_lock(mutex_);
   if (!started_) {
     ELOG("game not started, cannot createNewPlayer");
     return -1;
   }
+  return createNewPlayerUnlocked(input)->id();
+}
+
+Player* Game::createNewPlayerUnlocked(const PlayerInput* const input) {
   DLOG("new player " << input->username());
   Player* player = world_.add_players();
   Ship* ship = player->mutable_ship();
@@ -135,8 +132,9 @@ int64_t Game::createNewPlayer(const PlayerInput* const input) {
   player->set_id(++player_id_);
   player->set_username(input->username());
   player->set_is_new(true);
+  int color = Hoist::RNG::rand<int>(36) * 10;
   player->mutable_color()->set_aarrggbb(
-      hsv2int64(hsv{Hoist::RNG::roll() * 360.0, 1, 1}));
+      hsv2int64(hsv{static_cast<double>(color), 1, 1}));
   phys::set(body->mutable_size(), ships::size, ships::size);
   phys::set(body->mutable_rotation(), physics->vel());
   phys::reset(physics->mutable_vel());
@@ -151,7 +149,7 @@ int64_t Game::createNewPlayer(const PlayerInput* const input) {
   state.new_countdown = ships::new_invincibility_time;
 
   logNumPlayers();
-  return player->id();
+  return player;
 }
 
 void Game::logNumPlayers() {
@@ -161,8 +159,8 @@ void Game::logNumPlayers() {
                 << " playing.");
 }
 
-void Game::getWorld(World* world) {
-  std::shared_lock<std::shared_timed_mutex> lock(mutex_);
+READ_LOCKED void Game::getWorld(World* world) {
+  ReadLock read_lock(mutex_);
   if (!started_) {
     ELOG("game not started, cannot getWorld");
     return;
@@ -170,8 +168,8 @@ void Game::getWorld(World* world) {
   world->CopyFrom(world_);
 }
 
-void Game::update() {
-  std::unique_lock<std::shared_timed_mutex> lock(mutex_);
+WRITE_LOCKED void Game::update() {
+  WriteLock write_lock(mutex_);
   if (!started_) {
     ELOG("game not started, cannot update");
     return;
@@ -182,6 +180,7 @@ void Game::update() {
   updateShips(dt);
   updateBullets(dt);
   updateExplosions(dt);
+  updateAI(dt);
 }
 
 float Game::computeTimeDelta() {
@@ -206,7 +205,14 @@ void Game::updateBulletCollisions(float dt) {
         continue;
       }
       if (phys::willCollide(player.ship().body(), bullet.body(), dt)) {
-        ILOG("player " << player.username() << " was shot!");
+        for (int assailantIndex = 0; assailantIndex < world_.players_size();
+             assailantIndex++) {
+          const Player& assailant = world_.players(assailantIndex);
+          if (bullet.player_id() == assailant.id()) {
+            ILOG("player " << player.username() << " was shot by "
+                           << assailant.username() << '!');
+          }
+        }
         // remove bullet
         world_.mutable_bullets()->DeleteSubrange(bi, 1);
         bi--;
@@ -353,5 +359,31 @@ void setRandomSpawnPosition(game::Vector* v) {
   phys::set(v, Hoist::RNG::roll() * world::spawn_radius, 0);
   phys::rotate(v, Hoist::RNG::roll() * 2 * M_PI);
 }
+
+void Game::createNewAI(const PlayerInput* const input) {
+  DLOG("AI entered the game. username=" << input->username()
+                                        << " token=" << input->token());
+  Player* bot = createNewPlayerUnlocked(input);
+  bots_.push_back(bot);
+}
+
+void Game::updateAI(float dt) {
+  for (const Player* player : bots_) {
+    PlayerState& ps = player_states_[player];
+    BotState& bs = bot_states_[player];
+
+    bs.time += dt;
+    int seconds = static_cast<int>(bs.time);
+
+    PlayerInput& input = ps.input;
+    input.set_fire(seconds % 5 == 0);
+    input.set_thrust(seconds % 3 == 0);
+    bool left = seconds % 4 == 0;
+    input.set_rotate_left(left);
+    input.set_rotate_right(!left);
+  }
+}
+
+// } Game
 
 }  // namespace spacefight
