@@ -87,8 +87,15 @@ def proto_library(**kwargs):
     _set_default(kwargs, 'verbose', 0)
     _set_default(kwargs, 'with_grpc', False)
 
-    cc_proto_library(**_proto_params(kwargs, 'cc'))
-    go_proto_library(**_proto_params(kwargs, 'go'))
+    go_package = kwargs.pop('go_package', None)
+
+    cc_params = _proto_params(kwargs, 'cc')
+    cc_proto_library(**cc_params)
+
+    go_params = _proto_params(kwargs, 'go')
+    if go_package:
+        go_params['go_package'] = go_package
+    go_proto_library(**go_params)
 
 def _proto_params(params, lang_code):
     """Builds params for a specific language.
