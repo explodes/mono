@@ -15,7 +15,7 @@ namespace spacefight {
 class Game final {
  public:
   Game() : Game(std::make_shared<Hoist::SystemClock>()) {}
-  Game(std::shared_ptr<Hoist::Clock> clock, const int numBots = 15)
+  Game(std::shared_ptr<Hoist::Clock> clock, const int numBots = 4)
       : clock_(clock),
         last_update_(0),
         started_(false),
