@@ -11,7 +11,7 @@ static constexpr std::chrono::milliseconds game_update_interval(26);
 }  // namespace settings
 
 namespace world {
-static constexpr float spawn_radius = 7000;
+static constexpr float spawn_radius = 2500;
 }  // namespace world
 
 namespace ships {
@@ -20,7 +20,7 @@ static constexpr float thrust = 5000.0f;
 static constexpr float max_vel = 250.0f;
 static constexpr float max_acc = 100.0f;
 static constexpr float rotate_speed = degToRad(180);
-static constexpr float fire_rate = 0.66f;
+static constexpr float fire_rate = 0.56f;
 static constexpr float new_invincibility_time = 3.5f;
 static constexpr float respawn_time = 4.0f;
 }  // namespace ships
@@ -28,7 +28,7 @@ static constexpr float respawn_time = 4.0f;
 namespace bullets {
 static constexpr float size = 7.0f;
 static constexpr float vel = 400.0f;
-static constexpr float lifespan = 1;
+static constexpr float lifespan = 3;
 }  // namespace bullets
 
 namespace explosions {
