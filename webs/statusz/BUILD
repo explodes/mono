@@ -14,6 +14,17 @@ cc_library(
     ],
 )
 
+cc_binary(
+    name = "check",
+    srcs = ["check.cc"],
+    deps = [
+        ":client",
+        "//hoist:errors",
+        "//hoist:init",
+        "//hoist:logging",
+    ],
+)
+
 cc_library(
     name = "client",
     srcs = ["client.cc"],
