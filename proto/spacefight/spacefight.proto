@@ -19,6 +19,7 @@ message Player {
     Ship ship = 4;
     bool is_new = 5;
     bool is_dead = 6;
+    bool is_thrusting = 7;
 }
 
 message Bullet {

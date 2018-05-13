@@ -41,10 +41,16 @@ void Game::start() {
   last_update_ = clock_->nanos();
 
   // TODO(explodes): remove dummy player hack
-  PlayerInput* leaked_input = new PlayerInput();
-  leaked_input->set_username("gunther");
-  leaked_input->set_token("tacobellisprettyok");
-  createNewPlayer(leaked_input);
+  for (int i = 0; i < 30; i++) {
+    std::string name("gunther");
+    name.append(std::to_string(i));
+    std::string token("token");
+    token.append(std::to_string(i));
+    PlayerInput* leaked_input = new PlayerInput();
+    leaked_input->set_username(name);
+    leaked_input->set_token(token);
+    createNewPlayer(leaked_input);
+  }
 
   update_thread_ = std::thread([this]() {
     DLOG("update loop started");
@@ -245,6 +251,7 @@ void Game::updateShips(float dt) {
     PlayerState& state = player_states_[player];
     if (!state.isDead()) {
       // INPUT
+      player->set_is_thrusting(state.input.thrust());
       if (state.input.thrust()) {
         game::Vector v;
         phys::set(&v, ships::thrust * dt, 0);
