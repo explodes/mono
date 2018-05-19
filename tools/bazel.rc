@@ -5,7 +5,7 @@ build --cxxopt='-std=c++17'
 
 build:debug -c dbg
 build:debug --cxxopt=-DDEBUG
-build:release --cxxopt='-DLOG_LEVEL=4'
+build:debug --cxxopt='-DLOG_LEVEL=4'
 
 build:release -c opt
 build:release --cxxopt='-DLOG_LEVEL=3'
