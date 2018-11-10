@@ -47,3 +47,19 @@ cpp_proto_repositories()
 load("@org_pubref_rules_protobuf//go:rules.bzl", "go_proto_repositories")
 
 go_proto_repositories()
+
+# git_repository(
+#     name = "com_google_absl",
+#     commit = "070f6e47b33a2909d039e620c873204f78809492",
+#     remote = "https://github.com/abseil/abseil-cpp",
+# )
+
+# bind(
+#     name = "com_google_absl",
+#     actual = "//third_party/abseil-cpp",
+# )
+
+local_repository(
+    name = "com_google_absl",
+    path = "third_party/abseil-cpp",
+)

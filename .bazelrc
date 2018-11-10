@@ -1,6 +1,7 @@
 ## BUILD OPTIONS
 
 # c-opts
+build --client_env=CC=gcc
 build --cxxopt='-std=c++17'
 
 build:debug -c dbg
