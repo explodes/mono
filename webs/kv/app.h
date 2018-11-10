@@ -2,9 +2,9 @@
 #define WEBS_KV_APP_H
 
 #include <vector>
-#include "endpoints.h"
 #include "pistache/endpoint.h"
-#include "storage.h"
+#include "webs/kv/endpoints.h"
+#include "webs/kv/storage.h"
 #include "webs/scaffolding/component.h"
 
 class App final : public Component {

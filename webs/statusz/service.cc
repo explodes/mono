@@ -1,6 +1,7 @@
-#include "service.h"
+#include "webs/statusz/service.h"
+
 #include <sys/time.h>
-#include "memory.h"
+#include "webs/statusz/memory.h"
 
 namespace statusz {
 

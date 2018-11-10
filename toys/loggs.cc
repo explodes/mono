@@ -1,6 +1,9 @@
-#include "hoist/hoist.h"
+#include "hoist/init.h"
+#include "hoist/logging.h"
 
 int main() {
+  Hoist::Init();
+
   ELOG("error log always"
        << " (ok)");
   WLOG("warning log always"

@@ -1,5 +1,7 @@
 #include <iostream>
-#include "hoist/hoist.h"
+#include "hoist/init.h"
+#include "hoist/input.h"
+#include "hoist/statusor.h"
 
 const double earthGravity(9.8);
 
@@ -23,17 +25,17 @@ void dropBall(double initialHeight) {
 int main() {
   Hoist::Init();
 
-  Hoist::Result<double> towerHeight;
+  Hoist::StatusOr<double> towerHeight;
 
   do {
     towerHeight = Hoist::prompt<double>(
         "Enter the initial height of the tower in meters:");
-    if (!towerHeight.ok() || towerHeight.value() == 0) {
+    if (!towerHeight.ok() || towerHeight.ValueOrDie() == 0) {
       std::cerr << "invalid drop height" << std::endl;
     }
   } while (!towerHeight.ok());
 
-  dropBall(towerHeight.value());
+  dropBall(towerHeight.ValueOrDie());
   Hoist::waitForInput("Press enter to continue.");
   return 0;
 }

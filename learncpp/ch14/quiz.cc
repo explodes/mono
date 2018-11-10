@@ -1,6 +1,6 @@
 #include <iostream>
 
-double approx(int num, int den) throw(const char*) {
+double approx(int num, int den) noexcept(false) {
   if (den == 0) {
     throw "invalid denominator: divide by zero";
   }

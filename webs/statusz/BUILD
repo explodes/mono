@@ -19,9 +19,9 @@ cc_binary(
     srcs = ["check.cc"],
     deps = [
         ":client",
-        "//hoist:errors",
         "//hoist:init",
         "//hoist:logging",
+        "//hoist:status",
     ],
 )
 
@@ -30,8 +30,9 @@ cc_library(
     srcs = ["client.cc"],
     hdrs = ["client.h"],
     deps = [
-        "//hoist:errors",
         "//hoist:logging",
+        "//hoist:status",
+        "//hoist:statusor",
         "//proto/common:empty_cc_pb",
         "//proto/statusz:statusz_cc_pb",
         "//proto/statusz:statusz_service_cc_pb",

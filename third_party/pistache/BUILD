@@ -6,7 +6,9 @@ cc_library(
     name = "pistache",
     srcs = glob(["src/**/*.cc"]),
     hdrs = glob(["include/**/*.h"]),
-    copts = ["-w"],
+    copts = [
+        "-w",
+    ],
     includes = [
         "include",
     ],
@@ -16,7 +18,10 @@ cc_library(
 
 cc_gtest_group(
     name = "pistache",
-    copts = ["-w"],
+    copts = [
+        "-w",
+        "-fexceptions",
+    ],
     programs = glob(["tests/**/*.cc"]),
     deps = [
         ":pistache",

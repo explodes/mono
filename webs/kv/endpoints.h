@@ -2,8 +2,7 @@
 #define WEBS_RNGAPI_ENDPOINTS_H
 
 #include <memory>
-#include "hoist/hoist.h"
-#include "storage.h"
+#include "webs/kv/storage.h"
 #include "webs/scaffolding/endpoints.h"
 
 class KvEndpoints final : public Endpoints {

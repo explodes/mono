@@ -2,7 +2,8 @@
 #define WEBS_KV_STORAGE_H
 
 #include <memory>
-#include "hoist/hoist.h"
+#include "hoist/status.h"
+#include "hoist/statusor.h"
 #include "sqlite_modern_cpp.h"
 #include "webs/scaffolding/component.h"
 
@@ -18,7 +19,7 @@ class Storage final : public Component {
   void start() override;
   void shutdown() override;
 
-  Hoist::Result<std::string> get(const std::string &key);
+  Hoist::StatusOr<std::string> get(const std::string &key);
   Hoist::Status put(const std::string &key, const std::string &value);
 
  private:

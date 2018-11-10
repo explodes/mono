@@ -1,5 +1,5 @@
-#include "endpoints.h"
-#include "hoist/hoist.h"
+#include "webs/scaffolding/endpoints.h"
+
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
 #include "pistache/router.h"

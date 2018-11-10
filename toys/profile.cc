@@ -1,12 +1,16 @@
 #include <iostream>
-#include "hoist/hoist.h"
+#include "hoist/init.h"
+#include "hoist/input.h"
+#include "hoist/statusor.h"
 
 int main() {
-  Hoist::Result<int> age = Hoist::prompt<int>("What is your age? ");
-  Hoist::Result<std::string> name =
-      Hoist::prompt<std::string>("What is your name? ");
+  Hoist::Init();
 
-  std::cout << name.value() << " is " << age.value() << " years old\n";
+  int age = Hoist::prompt<int>("What is your age? ").ValueOrDie();
+  std::string name =
+      Hoist::prompt<std::string>("What is your name? ").ValueOrDie();
+
+  std::cout << name << " is " << age << " years old\n";
 
   return 0;
 }

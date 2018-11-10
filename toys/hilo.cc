@@ -1,19 +1,22 @@
 #include <iostream>
-#include "hoist/hoist.h"
+#include "hoist/init.h"
+#include "hoist/input.h"
+#include "hoist/math.h"
+#include "hoist/statusor.h"
 
 static constexpr int minimumNumber{0};
 static constexpr int maximumNumber{500000};
 
 int obtainGuess() {
-  Hoist::Result<int> result;
+  Hoist::StatusOr<int> result;
   do {
     result = Hoist::prompt<int>("Enter your guess:");
-    if (!result.ok() || result.value() < minimumNumber ||
-        result.value() > maximumNumber) {
+    if (!result.ok() || result.ValueOrDie() < minimumNumber ||
+        result.ValueOrDie() > maximumNumber) {
       std::cerr << "invalid guess, try again: ";
     }
   } while (!result.ok());
-  return result.value();
+  return result.ValueOrDie();
 }
 
 void playGame() {
@@ -39,14 +42,14 @@ void playGame() {
 }
 
 bool playAgain() {
-  Hoist::Result<std::string> result;
+  Hoist::StatusOr<std::string> result;
   std::string answer;
   while (true) {
     result = Hoist::prompt<std::string>("Would you like to play again (y/n)?");
     if (!result.ok()) {
       continue;
     }
-    answer = result.value();
+    answer = result.ValueOrDie();
     if (answer.compare("y") == 0 || answer.compare("n") == 0) {
       break;
     }

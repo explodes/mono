@@ -1,3 +1,15 @@
 [submodule "third_party/abseil-cpp"]
 	path = third_party/abseil-cpp
 	url = https://github.com/abseil/abseil-cpp
+[submodule "third_party/googletest"]
+	path = third_party/googletest
+	url = https://github.com/google/googletest
+[submodule "third_party/benchmark"]
+	path = third_party/benchmark
+	url = https://github.com/google/benchmark
+[submodule "third_party/rules_go"]
+	path = third_party/rules_go
+	url = https://github.com/bazelbuild/rules_go
+[submodule "third_party/rules_protobuf"]
+	path = third_party/rules_protobuf
+	url = https://github.com/pubref/rules_protobuf

@@ -4,12 +4,12 @@
 #include <google/protobuf/text_format.h>
 #include <grpc++/grpc++.h>
 #include <memory>
-#include "client.h"
-#include "hoist/errors.h"
 #include "hoist/init.h"
 #include "hoist/logging.h"
+#include "hoist/statusor.h"
+#include "webs/statusz/client.h"
 
-Hoist::Result<std::shared_ptr<statusz::Status>> poll(std::string &addr) {
+Hoist::StatusOr<std::shared_ptr<statusz::Status>> poll(std::string &addr) {
   std::shared_ptr<grpc::Channel> channel =
       grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
   statusz::StatuszClient client(channel);
@@ -30,13 +30,13 @@ int main(int argc, char *argv[]) {
   ILOG("STATUSZ");
   ILOG("Checking server " << addr);
 
-  Hoist::Result<std::shared_ptr<statusz::Status>> status = poll(addr);
+  Hoist::StatusOr<std::shared_ptr<statusz::Status>> status = poll(addr);
 
   if (!status.ok()) {
     ELOG("Error checking " << addr << '.');
   } else {
     std::string s;
-    google::protobuf::TextFormat::PrintToString(*status.value(), &s);
+    google::protobuf::TextFormat::PrintToString(*status.ValueOrDie(), &s);
     ILOG("Got STATUSZ\n" << s);
   }
 

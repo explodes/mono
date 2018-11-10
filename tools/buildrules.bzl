@@ -12,8 +12,7 @@ def cc_gtest(**kwargs):
 
     See //scratch/hello_test.cc for an example.
     """
-    _add_dep(kwargs, '@gtest//:main')
-    _add_strings(kwargs, 'copts', '-Iexternal/gtest/include')
+    _add_dep(kwargs, '//third_party/googletest:gtest')
     _set_default(kwargs, 'size', 'small')
     native.cc_test(**kwargs)
 
@@ -26,7 +25,7 @@ def cc_gbench(**kwargs):
 
     See //scratch/hello_bench.cc for an example.
     """
-    _add_dep(kwargs, '@googlebenchmark//:main')
+    _add_dep(kwargs, '//third_party/googlebenchmark:main')
     _add_strings(kwargs, 'tags', 'exclusive', 'benchmark', 'manual')
     _set_default(kwargs, 'size', 'enormous')
     native.cc_test(**kwargs)

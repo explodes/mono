@@ -4,7 +4,8 @@
 #include <iostream>
 #include <limits>
 #include <string>
-#include "errors.h"
+#include "hoist/status.h"
+#include "hoist/statusor.h"
 
 namespace Hoist {
 
@@ -18,7 +19,7 @@ inline void clearInput() {
 }
 
 template <typename T>
-Result<T> prompt(const std::string &message) {
+StatusOr<T> prompt(const std::string &message) {
   std::cout << message << " ";
   T input;
   std::cin >> input;
@@ -26,24 +27,24 @@ Result<T> prompt(const std::string &message) {
 
   if (std::cin.fail()) {
     clearInput();
-    return Result<T>(StatusCode::Invalid);
+    return Status(error::UNKNOWN, "standard input failed");
   }
-  return Result<T>(input);
+  return input;
 }
 
 template <typename T>
 T mustPrompt(const std::string &message, const std::string &retryMessage) {
-  Result<T> result;
+  StatusOr<T> result;
   bool first{true};
   do {
     result = prompt<T>(first ? message : retryMessage);
     first = false;
   } while (!result.ok());
-  return result.value();
+  return result.ValueOrDie();
 }
 
 template <>
-inline Result<std::string> prompt<std::string>(const std::string &message) {
+inline StatusOr<std::string> prompt<std::string>(const std::string &message) {
   std::cout << message << " ";
   std::string input;
   clearInput();
@@ -52,9 +53,9 @@ inline Result<std::string> prompt<std::string>(const std::string &message) {
 
   if (std::cin.fail()) {
     clearInput();
-    return Result<std::string>(StatusCode::Invalid);
+    return Status(error::UNKNOWN, "standard input failed");
   }
-  return Result<std::string>(input);
+  return input;
 }
 
 // waitForInput pauses execution until the user presses enter

@@ -1,4 +1,4 @@
-#include "storage.h"
+#include "webs/rngapi/storage.h"
 
 #ifdef DEBUG
 #include <iostream>
@@ -15,16 +15,16 @@ void Storage::start() {}
 
 void Storage::shutdown() {}
 
-Hoist::Result<std::string> Storage::get(const std::string &key) {
+Hoist::StatusOr<std::string> Storage::get(const std::string &key) {
   try {
     std::string value;
     db_ << "SELECT value FROM kvstore WHERE key = ?;" << key >> value;
-    return Hoist::Result<std::string>(value);
+    return value;
   } catch (const std::exception &e) {
 #ifdef DEBUG
     std::cerr << "error: " << e.what() << std::endl;
 #endif
-    return Hoist::Result<std::string>(Hoist::StatusCode::Invalid);
+    return Hoist::Status(Hoist::error::NOT_FOUND, "key not found");
   }
 }
 
@@ -35,11 +35,11 @@ Hoist::Status Storage::put(const std::string &key, const std::string &value) {
     } else {
       db_ << "INSERT INTO kvstore (key, value) VALUES (?, ?);" << key << value;
     }
-    return Hoist::Status(Hoist::StatusCode::OK);
+    return Hoist::Status::OK;
   } catch (const std::exception &e) {
 #ifdef DEBUG
     std::cerr << "error: " << e.what() << std::endl;
 #endif
-    return Hoist::Status(Hoist::StatusCode::Invalid);
+    return Hoist::Status(Hoist::error::INTERNAL, "failed to put value");
   }
 }

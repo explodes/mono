@@ -2,9 +2,9 @@
 #define WEBS_RNGAPI_APP_H
 
 #include <vector>
-#include "endpoints.h"
 #include "pistache/endpoint.h"
-#include "storage.h"
+#include "webs/rngapi/endpoints.h"
+#include "webs/rngapi/storage.h"
 #include "webs/scaffolding/component.h"
 
 class App final : public Component {

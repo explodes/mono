@@ -2,8 +2,7 @@
 #define WEBS_RNGAPI_ENDPOINTS_H
 
 #include <memory>
-#include "hoist/hoist.h"
-#include "storage.h"
+#include "webs/rngapi/storage.h"
 #include "webs/scaffolding/endpoints.h"
 
 class RngEndpoints final : public Endpoints {

@@ -2,7 +2,6 @@
 #define WEBS_SCAFFOLDING_ENDPOINTS_H
 
 #include <memory>
-#include "hoist/hoist.h"
 #include "pistache/endpoint.h"
 #include "pistache/router.h"
 #include "webs/scaffolding/component.h"

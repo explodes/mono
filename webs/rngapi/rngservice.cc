@@ -1,8 +1,8 @@
 #include <csignal>
 #include <iostream>
-#include "app.h"
-#include "hoist/hoist.h"
+#include "hoist/init.h"
 #include "pistache/endpoint.h"
+#include "webs/rngapi/app.h"
 
 int main() {
   Hoist::Init();

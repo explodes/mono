@@ -1,4 +1,5 @@
-#include "storage.h"
+#include "webs/kv/storage.h"
+
 #include "gtest/gtest.h"
 
 class StorageTest : public ::testing::Test {
@@ -10,7 +11,7 @@ class StorageTest : public ::testing::Test {
 
   virtual void TearDown() { delete storage; }
 
-  Storage *storage;
+  Storage* storage;
 };
 
 TEST_F(StorageTest, Get_DoesNotExist_NotOk) {
@@ -32,7 +33,8 @@ TEST_F(StorageTest, Get_Exists_Value) {
 
   auto result = storage->get("test");
 
-  EXPECT_EQ(result.value(), "ok");
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.ValueOrDie(), "ok");
 }
 
 TEST_F(StorageTest, Set_DoesNotExist_Ok) {
@@ -55,5 +57,11 @@ TEST_F(StorageTest, Set_Exists_Value) {
 
   auto result = storage->get("test");
 
-  EXPECT_EQ(result.value(), "ok2");
+  ASSERT_TRUE(result.ok());
+  EXPECT_EQ(result.ValueOrDie(), "ok2");
+}
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

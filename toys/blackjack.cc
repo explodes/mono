@@ -1,7 +1,10 @@
 #include <unistd.h>
 #include <iostream>
 #include <vector>
-#include "hoist/hoist.h"
+#include "hoist/init.h"
+#include "hoist/input.h"
+#include "hoist/math.h"
+#include "hoist/statusor.h"
 
 static const int numRanks = 4;
 static const int numCards = 13;
@@ -196,7 +199,12 @@ void playersTurn(Player &player, Deck &deck) {
   while (player.value() < maxScore) {
     char c;
     do {
-      c = Hoist::mustPrompt<char>("(h)it or (s)tay?", "invalid");
+      Hoist::StatusOr<char> value =
+          Hoist::mustPrompt<char>("(h)it or (s)tay?", "invalid");
+      if (!value.ok()) {
+        continue;
+      }
+      c = value.ValueOrDie();
     } while (c != 'h' && c != 's');
     switch (c) {
       case 'h':

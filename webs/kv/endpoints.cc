@@ -1,7 +1,8 @@
-#include "endpoints.h"
+#include "webs/kv/endpoints.h"
+
 #include <sstream>
 #include <unordered_map>
-#include "hoist/hoist.h"
+#include "hoist/logging.h"
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
 #include "pistache/router.h"
@@ -25,7 +26,7 @@ void KvEndpoints::handleKV_get(const Request& request,
   auto fetch = storage_.get(key);
   DLOG("get " << key << " " << (fetch.ok() ? "ok" : "not ok"));
   if (fetch.ok()) {
-    response.send(Pistache::Http::Code::Ok, fetch.value());
+    response.send(Pistache::Http::Code::Ok, fetch.ValueOrDie());
   } else {
     response.send(Pistache::Http::Code::Internal_Server_Error);
   }

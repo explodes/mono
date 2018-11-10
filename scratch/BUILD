@@ -1,19 +1,33 @@
 # Build rules for a C++ scratchpad.
 
-load("//hoist:buildrules.bzl", "hoisted_binary")
-load("//tools:buildrules.bzl", "cc_gtest", "cc_gbench")
-
-hoisted_binary(
+cc_binary(
     name = "scratch",
     srcs = ["scratch.cc"],
 )
 
-cc_gtest(
+cc_test(
     name = "hello-test",
-    srcs = ["hello_test.cc"],
+    size = "small",
+    srcs = [
+        "hello_test.cc",
+    ],
+    deps = [
+        "//third_party/googletest:gtest",
+    ],
 )
 
-cc_gbench(
+cc_test(
     name = "hello-bench",
-    srcs = ["hello_bench.cc"],
+    size = "enormous",
+    srcs = [
+        "hello_bench.cc",
+    ],
+    tags = [
+        "benchmark",
+        "exclusive",
+        "manual",
+    ],
+    deps = [
+        "//third_party/benchmark",
+    ],
 )

@@ -1,7 +1,8 @@
-#include "endpoints.h"
+#include "webs/rngapi/endpoints.h"
+
 #include <sstream>
 #include <unordered_map>
-#include "hoist/hoist.h"
+#include "hoist/math.h"
 #include "nlohmann/json.hpp"
 #include "pistache/endpoint.h"
 #include "pistache/http.h"
@@ -83,12 +84,12 @@ void RngEndpoints::handleKV(const Request& request, ResponseWriter response) {
     }
   }
 
-  Hoist::Result<std::string> fetch = storage_.get(key);
+  Hoist::StatusOr<std::string> fetch = storage_.get(key);
   if (!fetch.ok()) {
     response.send(Pistache::Http::Code::Internal_Server_Error);
     return;
   } else {
-    response.send(Pistache::Http::Code::Ok, fetch.value());
+    response.send(Pistache::Http::Code::Ok, fetch.ValueOrDie());
     return;
   }
 }

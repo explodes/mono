@@ -76,9 +76,9 @@ cc_library(
     hdrs = ["service.h"],
     deps = [
         ":game",
-        "//hoist:errors",
         "//hoist:logging",
         "//hoist:math",
+        "//hoist:status",
         "//proto/spacefight:spacefight_cc_pb",
         "//proto/spacefight:spacefight_service_cc_pb",
     ],

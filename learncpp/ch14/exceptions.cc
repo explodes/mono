@@ -1,12 +1,12 @@
 #include <iostream>
 
-void failInt() throw(int) { throw 12384; }
+void failInt() noexcept(false) { throw 12384; }
 
-void failDouble() throw(double) { throw 234.34; }
+void failDouble() noexcept(false) { throw 234.34; }
 
-void failCharPointer() throw(const char*) { throw "~~exception118~~"; }
+void failCharPointer() noexcept(false) { throw "~~exception118~~"; }
 
-void failString() throw(std::string&) { throw std::string("~~exception42~~"); }
+void failString() noexcept(false) { throw std::string("~~exception42~~"); }
 
 class A {
  public:

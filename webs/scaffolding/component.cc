@@ -1,4 +1,4 @@
-#include "component.h"
+#include "webs/scaffolding/component.h"
 
 void CompositeComponent::init() {
   for (const auto &component : components_) {

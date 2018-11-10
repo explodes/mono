@@ -4,7 +4,7 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-#include "hoist/hoist.h"
+#include "hoist/init.h"
 #include "hoist/sync/waitgroup.h"
 
 static std::mutex outputMutex;
