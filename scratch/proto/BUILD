@@ -2,15 +2,16 @@
 # grpc, with a server and client using rpc and streaming
 # protocols.
 
-load("//hoist:buildrules.bzl", "hoisted_binary")
 load("//tools:buildrules.bzl", "proto_library")
 
-hoisted_binary(
+cc_binary(
     name = "client",
     srcs = ["client.cc"],
     deps = [
         ":sample_service_cc_pb",
-        "//webs/statusz:client",
+        "//hoist:init",
+        "//hoist:statusor",
+        "//net/statusz:client",
     ],
 )
 
@@ -37,6 +38,6 @@ cc_binary(
     srcs = ["server.cc"],
     deps = [
         ":sample_service_cc_pb",
-        "//webs/statusz:service",
+        "//net/statusz:service",
     ],
 )

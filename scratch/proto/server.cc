@@ -1,10 +1,10 @@
 #include <grpc++/grpc++.h>
 #include <iostream>
 #include <string>
+#include "net/statusz/service.h"
 #include "scratch/proto/sample.pb.h"
 #include "scratch/proto/sample_service.grpc.pb.h"
 #include "scratch/proto/sample_service.pb.h"
-#include "webs/statusz/service.h"
 
 class ContentServiceImpl : public scratch::ContentService::Service {
  public:

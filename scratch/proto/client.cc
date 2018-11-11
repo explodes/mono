@@ -1,9 +1,10 @@
-#include "webs/statusz/client.h"
+#include "net/statusz/client.h"
 #include <google/protobuf/text_format.h>
 #include <grpc++/grpc++.h>
 #include <iostream>
 #include <string>
-#include "hoist/hoist.h"
+#include "hoist/init.h"
+#include "hoist/statusor.h"
 #include "scratch/proto/sample.pb.h"
 #include "scratch/proto/sample_service.grpc.pb.h"
 #include "scratch/proto/sample_service.pb.h"
@@ -39,7 +40,7 @@ class ContentClient final {
     return stub_->Get(&context, request, response);
   }
 
-  Hoist::Result<std::vector<scratch::Content *>> Stream() {
+  Hoist::StatusOr<std::vector<scratch::Content *>> Stream() {
     grpc::ClientContext context;
     const scratch::ContentRequest request;
     std::unique_ptr<grpc::ClientReader<scratch::Content>> stream(
@@ -56,17 +57,16 @@ class ContentClient final {
     grpc::Status status = stream->Finish();
 
     if (!status.ok()) {
-      return Hoist::Result<std::vector<scratch::Content *>>(
-          Hoist::StatusCode::UnknownError);
+      return Hoist::Status(Hoist::error::UNAVAILABLE, status.error_message());
     } else {
-      return Hoist::Result<std::vector<scratch::Content *>>(contents);
+      return contents;
     }
   }
 
   void printStatusz() {
     auto statusz = statusz_.Poll();
     if (statusz.ok()) {
-      dumpMessage(statusz.value().get());
+      dumpMessage(statusz.ValueOrDie().get());
     }
   }
 
@@ -88,12 +88,12 @@ void doGet(ContentClient &client) {
 
 void doStream(ContentClient &client) {
   std::cout << "STREAM" << std::endl;
-  Hoist::Result<std::vector<scratch::Content *>> results(client.Stream());
+  Hoist::StatusOr<std::vector<scratch::Content *>> results(client.Stream());
 
   if (!results.ok()) {
     std::cout << "FAILURE!!" << std::endl;
   } else {
-    for (auto content : results.value()) {
+    for (auto content : results.ValueOrDie()) {
       dumpMessage(content);
       delete content;
     }
