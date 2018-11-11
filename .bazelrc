@@ -3,6 +3,7 @@
 # c-opts
 build --client_env=CC=gcc
 build --cxxopt='-std=c++17'
+build --cxxopt='-fno-exceptions'
 
 build:debug -c dbg
 build:debug --cxxopt=-DDEBUG
