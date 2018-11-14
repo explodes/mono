@@ -21,15 +21,16 @@ static std::mutex log_mutex;
 #define DEBUG_LEVEL 4
 
 #ifndef LOG_LEVEL
-#define LOG_LEVEL DEBUG_LEVEL
+#define LOG_LEVEL WARN_LEVEL
 #endif
 
 #define _FILE strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__
-#define LOG_FUNC(tag, x)                                                  \
-  do {                                                                    \
-    std::unique_lock<std::mutex> lock(log_mutex);                         \
-    std::cerr << timenow() << (tag) << " " << __FILE__ << ":" << __LINE__ \
-              << "\t" << x << std::endl;                                  \
+#define LOG_FUNC(tag, x)                                            \
+  do {                                                              \
+    char buffer[24];                                                \
+    std::unique_lock<std::mutex> lock(log_mutex);                   \
+    std::cerr << timenow(buffer) << (tag) << " " << __FILE__ << ":" \
+              << __LINE__ << "\t" << x << std::endl;                \
   } while (false)
 
 #if LOG_LEVEL >= ERROR_LEVEL
@@ -63,24 +64,19 @@ static std::mutex log_mutex;
 #define DLOG(x) LOG_FUNC(DEBUG_TAG, x)
 #define DLOG_IF(condition, x) \
   if (condition) DLOG(x)
-#define IF_DEBUG(x) (x)
-#define IF_NDEBUG(x)
+#define PRINT(x) DLOG((#x) << " " << (x))
 #else
 #define DLOG(x)
 #define DLOG_IF(condition, x)
-#define IF_DEBUG(x)
-#define IF_NDEBUG(x) (x)
+#define PRINT(x)
 #endif
 
 #include <iostream>
 
-static inline char* timenow() {
-  static char buffer[24];
-  static int millisec;
-  static struct tm* tm_info;
-  static struct timeval tv;
-
-  // TODO(explodes): thread safety.
+static inline char* timenow(char* buffer) {
+  int millisec;
+  struct tm* tm_info;
+  struct timeval tv;
 
   gettimeofday(&tv, NULL);
 

@@ -37,6 +37,19 @@ cc_library(
     hdrs = ["logging.h"],
 )
 
+cc_test(
+    name = "logging_test",
+    size = "small",
+    srcs = ["logging_test.cc"],
+    copts = [
+        "-DLOG_LEVEL=4",
+    ],
+    deps = [
+        ":logging",
+        "//third_party/googletest:gtest",
+    ],
+)
+
 cc_library(
     name = "math",
     srcs = ["math.cc"],
