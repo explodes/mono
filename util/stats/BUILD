@@ -5,6 +5,15 @@ cc_library(
     deps = [],
 )
 
+cc_test(
+    name = "counter_test",
+    srcs = ["counter_test.cc"],
+    deps = [
+        ":counter",
+        "//third_party/googletest:gtest",
+    ],
+)
+
 cc_library(
     name = "histogram",
     srcs = [],

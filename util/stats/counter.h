@@ -10,7 +10,6 @@ namespace stats {
 using std::lock_guard;
 using std::mutex;
 
-template <typename T>
 class Counter {
  public:
   Counter() : count_(0) {}
@@ -18,10 +17,12 @@ class Counter {
   Counter(const Counter&) = delete;
   Counter& operator=(Counter const&) = delete;
 
-  void Put() {
+  void Put(uint64_t count) {
     lock_guard lock(mutex_);
-    ++count;
+    count_ += count;
   }
+
+  void Put() { Put(1); }
 
   uint64_t Count() const { return count_; }
 
