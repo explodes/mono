@@ -18,6 +18,11 @@ local_repository(
     path = "third_party/rules_go",
 )
 
+local_repository(
+    name = "bazel_skylib",
+    path = "third_party/bazel_skylib",
+)
+
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
 
 go_rules_dependencies()

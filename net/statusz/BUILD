@@ -22,6 +22,7 @@ cc_binary(
         "//hoist:init",
         "//hoist:logging",
         "//hoist:status",
+        "//proto/statusz:statusz_cc_pb",
     ],
 )
 

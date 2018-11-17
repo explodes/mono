@@ -8,6 +8,7 @@
 #include "hoist/logging.h"
 #include "hoist/statusor.h"
 #include "net/statusz/client.h"
+#include "proto/statusz/statusz.pb.h"
 
 Hoist::StatusOr<std::shared_ptr<statusz::Status>> poll(std::string &addr) {
   std::shared_ptr<grpc::Channel> channel =
