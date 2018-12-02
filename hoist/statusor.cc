@@ -1,13 +1,14 @@
 #include "hoist/statusor.h"
 
+#include <stdlib.h>
 #include <iostream>
 
 namespace Hoist {
 namespace internal {
 
 void StatusOrHelper::Crash(const Status& status) {
-  ::std::cerr << "Attempting to fetch value instead of handling error "
-              << status.ToString();
+  ::std::cerr << "Status not OK: " << status.ToString();
+  exit(EXIT_FAILURE);
 }
 
 }  // namespace internal

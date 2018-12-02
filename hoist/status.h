@@ -56,7 +56,7 @@ class Status {
   // Accessor
   bool ok() const { return error_code_ == error::OK; }
   int error_code() const { return error_code_; }
-  string_view error_message() const { return error_message_; }
+  string error_message() const { return error_message_; }
 
   bool operator==(const Status& x) const;
   bool operator!=(const Status& x) const { return !operator==(x); }
@@ -66,7 +66,7 @@ class Status {
 
  private:
   error::Code error_code_;
-  string_view error_message_;
+  string error_message_;
 };
 
 std::ostream& operator<<(std::ostream& os, const Status& x);
