@@ -1,4 +1,4 @@
-#include "db/bolt/internal/page.h"
+#include "db/bolt/node.h"
 
 #include "gtest/gtest.h"
 

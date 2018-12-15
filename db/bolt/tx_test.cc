@@ -1,4 +1,4 @@
-#include "db/bolt/tx.h"
+#include "db/bolt/bolt.h"
 
 #include "gtest/gtest.h"
 

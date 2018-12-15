@@ -1,11 +1,10 @@
-#ifndef DB_BOLT_INTERNAL_CONSTANTS_H
-#define DB_BOLT_INTERNAL_CONSTANTS_H
+#ifndef DB_BOLT_CONSTANTS_H
+#define DB_BOLT_CONSTANTS_H
 
 #include <cstdint>
 #include "db/bolt/arch.h"
 
 namespace bolt {
-namespace internal {
 
 #ifndef BOLT_ARCH
 #define BOLT_ARCH BOLT_ARCH_386
@@ -28,7 +27,6 @@ const int64_t kMaxAllocSize{0x7FFFFFFF};
 const bool kBrokenUnaligned{false};
 #endif
 
-}  // namespace internal
 }  // namespace bolt
 
-#endif  // DB_BOLT_INTERNAL_CONSTANTS_H
+#endif  // DB_BOLT_CONSTANTS_H

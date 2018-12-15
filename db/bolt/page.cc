@@ -1,3 +1,3 @@
-#include "db/bolt/internal/node.h"
+#include "db/bolt/page.h"
 
 namespace bolt {}  // namespace bolt

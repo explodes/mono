@@ -1,4 +1,4 @@
-#include "db/bolt/internal/freelist.h"
+#include "db/bolt/freelist.h"
 
 #include "gtest/gtest.h"
 
