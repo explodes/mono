@@ -57,6 +57,9 @@ class StatusOr {
   // returns Status::OK.
   const Status& status() const;
 
+  // Return a combination of the error code name and message.
+  string ToString() const { return status().ToString(); }
+
   // Returns this->status().ok()
   bool ok() const;
 
