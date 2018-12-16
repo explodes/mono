@@ -72,6 +72,14 @@ cc_library(
     hdrs = ["status.h"],
 )
 
+cc_library(
+    name = "status_macros",
+    hdrs = ["status_macros.h"],
+    deps = [
+        ":likely",
+    ],
+)
+
 cc_test(
     name = "status_test",
     size = "small",
