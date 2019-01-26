@@ -1,6 +1,7 @@
 #include "hoist/logging.h"
 
 #include <iostream>
+
 #include "gtest/gtest.h"
 
 namespace {

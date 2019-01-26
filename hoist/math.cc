@@ -1,4 +1,5 @@
-#include "math.h"
+#include "hoist/math.h"
+
 #include <random>
 
 namespace Hoist {

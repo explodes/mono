@@ -11,6 +11,9 @@ cc_library(
     name = "init",
     srcs = ["init.cc"],
     hdrs = ["init.h"],
+    deps = [
+        ":logging",
+    ],
 )
 
 cc_library(
@@ -33,7 +36,7 @@ cc_library(
 
 cc_library(
     name = "logging",
-    srcs = [],
+    srcs = ["logging.cc"],
     hdrs = ["logging.h"],
 )
 

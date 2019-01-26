@@ -5,14 +5,26 @@
 #include <sys/time.h>
 #include <time.h>
 #include <cmath>
+#include <iostream>
 #include <mutex>
 
-static constexpr char ERROR_TAG[] = " ERROR ";
-static constexpr char WARN_TAG[] = " WARN  ";
-static constexpr char INFO_TAG[] = " INFO  ";
-static constexpr char DEBUG_TAG[] = " DEBUG ";
+static constexpr char ERROR_TAG[] = "ERROR ";
+static constexpr char WARN_TAG[] = "WARN  ";
+static constexpr char INFO_TAG[] = "INFO  ";
+static constexpr char DEBUG_TAG[] = "DEBUG ";
 
 static std::mutex log_mutex;
+
+// Returns a more human-friendly thread ID.
+// If Hoist::Init() is called as it should be at program startup,
+// the main thread will have an ID of 0.
+size_t FriendlyThreadId();
+
+char* LogTimeNow(char* buffer);
+
+// Initialize logging.
+// This mehtod should only be called by Hoist::Init()
+void InitLogging();
 
 #define NO_LOG 0
 #define ERROR_LEVEL 1
@@ -25,12 +37,13 @@ static std::mutex log_mutex;
 #endif
 
 #define _FILE strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__
-#define LOG_FUNC(tag, x)                                            \
-  do {                                                              \
-    char buffer[24];                                                \
-    std::unique_lock<std::mutex> lock(log_mutex);                   \
-    std::cerr << timenow(buffer) << (tag) << " " << __FILE__ << ":" \
-              << __LINE__ << "\t" << x << std::endl;                \
+#define LOG_FUNC(tag, x)                                               \
+  do {                                                                 \
+    char buffer[24];                                                   \
+    std::scoped_lock<std::mutex> lock(log_mutex);                      \
+    std::cerr << (tag) << LogTimeNow(buffer) << " " << __FILE__ << ":" \
+              << __LINE__ << " tid=" << FriendlyThreadId() << " " << x \
+              << std::endl;                                            \
   } while (false)
 
 #if LOG_LEVEL >= ERROR_LEVEL
@@ -70,31 +83,5 @@ static std::mutex log_mutex;
 #define DLOG_IF(condition, x)
 #define PRINT(x)
 #endif
-
-#include <iostream>
-
-static inline char* timenow(char* buffer) {
-  int millisec;
-  struct tm* tm_info;
-  struct timeval tv;
-
-  gettimeofday(&tv, NULL);
-
-  millisec = lrint(tv.tv_usec / 1000.0);  // Round to nearest millisec
-  if (millisec >= 1000) {  // Allow for rounding up to nearest second
-    millisec -= 1000;
-    tv.tv_sec++;
-  }
-
-  tm_info = localtime(&tv.tv_sec);
-
-  // 0         1         2
-  // 012345678901234567890123
-  // 2018-05-04 18:32:49.777x // x = \0
-  strftime(buffer, 64, "%Y-%m-%d %H:%M:%S", tm_info);
-  snprintf(&buffer[19], 5, ".%03d", millisec);
-
-  return buffer;
-}
 
 #endif

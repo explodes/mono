@@ -1,4 +1,5 @@
-#include "clock.h"
+#include "hoist/clock.h"
+
 #include <time.h>
 
 namespace Hoist {
