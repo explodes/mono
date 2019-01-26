@@ -5,6 +5,7 @@
 #include <deque>
 #include <mutex>
 
+#include "hoist/logging.h"
 #include "hoist/status.h"
 #include "hoist/statusor.h"
 
@@ -26,13 +27,25 @@ class Queue {
  public:
   Queue() : mutex_(), available_(true), queue_(), condition_() {}
 
-  Status Put(T& t) {
+  Status Put(const T& t) {
     {
       scoped_lock lock(mutex_);
       if (!available_) {
         return Status(error::Code::UNAVAILABLE, "Put on closed Queue.");
       }
-      queue_.push_front(std::move(t));
+      queue_.push_front(t);
+    }
+    condition_.notify_one();
+    return Status::OK;
+  }
+
+  Status Put(T&& t) {
+    {
+      scoped_lock lock(mutex_);
+      if (!available_) {
+        return Status(error::Code::UNAVAILABLE, "Put on closed Queue.");
+      }
+      queue_.push_front(t);
     }
     condition_.notify_one();
     return Status::OK;
