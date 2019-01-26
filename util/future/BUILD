@@ -43,6 +43,7 @@ cc_library(
     srcs = [],
     hdrs = ["queue.h"],
     deps = [
+        "//hoist:logging",
         "//hoist:status",
         "//hoist:statusor",
     ],
