@@ -39,6 +39,19 @@ class StatusOr {
   // the effect of passing PosixErrorSpace::EINVAL as a fallback.
   StatusOr(const T& value);  // NOLINT
 
+  // Construct a new StatusOr with the given value. If T is a plain pointer,
+  // value must not be nullptr. After calling this constructor, calls to
+  // ValueOrDie() will succeed, and calls to status() will return OK.
+  //
+  // NOTE: Not explicit - we want to use StatusOr<T> as a return type
+  // so it is convenient and sensible to be able to do 'return T()'
+  // when when the return type is StatusOr<T>.
+  //
+  // REQUIRES: if T is a plain pointer, value != nullptr. This requirement is
+  // DCHECKed. In optimized builds, passing a null pointer here will have
+  // the effect of passing PosixErrorSpace::EINVAL as a fallback.
+  StatusOr(T&& value);  // NOLINT
+
   // Copy constructor.
   StatusOr(const StatusOr& other);
 
@@ -120,6 +133,16 @@ inline StatusOr<T>::StatusOr(const T& value) {
   } else {
     status_ = Status::OK;
     value_ = value;
+  }
+}
+
+template <typename T>
+inline StatusOr<T>::StatusOr(T&& value) {
+  if (internal::StatusOrHelper::Specialize<T>::IsValueNull(value)) {
+    status_ = Status(error::INTERNAL, "nullptr is not a vaild argument.");
+  } else {
+    status_ = Status::OK;
+    value_ = std::move(value);
   }
 }
 
