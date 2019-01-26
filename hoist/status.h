@@ -5,6 +5,10 @@
 #include <string_view>
 
 namespace Hoist {
+
+using ::std::string;
+using ::std::string_view;
+
 namespace error {
 
 // Taken from protobuf at:
@@ -29,10 +33,9 @@ enum Code {
   DATA_LOSS = 15,
 };
 
-}  // namespace error
+string CodeEnumToString(Code code);
 
-using ::std::string;
-using ::std::string_view;
+}  // namespace error
 
 class Status {
  public:
@@ -55,7 +58,7 @@ class Status {
 
   // Accessor
   bool ok() const { return error_code_ == error::OK; }
-  int error_code() const { return error_code_; }
+  error::Code error_code() const { return error_code_; }
   string error_message() const { return error_message_; }
 
   bool operator==(const Status& x) const;

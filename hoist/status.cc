@@ -6,7 +6,7 @@ using ::std::string;
 using ::std::string_view;
 
 namespace error {
-inline string CodeEnumToString(error::Code code) {
+string CodeEnumToString(error::Code code) {
   switch (code) {
     case OK:
       return "OK";
@@ -83,7 +83,7 @@ string Status::ToString() const {
     if (error_message_.empty()) {
       return error::CodeEnumToString(error_code_);
     } else {
-      return error::CodeEnumToString(error_code_) + ":" +
+      return error::CodeEnumToString(error_code_) + ": " +
              string(error_message_);
     }
   }
