@@ -15,7 +15,7 @@ using ::std::unique_ptr;
 template <typename T>
 class Executor {
  public:
-  virtual unique_ptr<Future<T>> Enqueue(const Function<T>& f) = 0;
+  virtual unique_ptr<Future<T>> Enqueue(const Function<T>&& f) = 0;
   virtual ~Executor() {}
 };
 

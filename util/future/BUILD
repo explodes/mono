@@ -42,5 +42,33 @@ cc_library(
     name = "queue",
     srcs = [],
     hdrs = ["queue.h"],
-    deps = [],
+    deps = [
+        "//hoist:status",
+        "//hoist:statusor",
+    ],
+)
+
+cc_test(
+    name = "queue_test",
+    srcs = ["queue_test.cc"],
+    deps = [
+        ":queue",
+        "//hoist:status_macros",
+        "//third_party/googletest:gtest",
+    ],
+)
+
+cc_binary(
+    name = "scratch",
+    srcs = ["scratch.cc"],
+    linkopts = [
+        "-lpthread",
+    ],
+    deps = [
+        ":function",
+        ":queue",
+        "//hoist:logging",
+        "//hoist:status_macros",
+        "//hoist:statusor",
+    ],
 )
