@@ -18,7 +18,8 @@ using ::util::future::Function;
 using ::util::future::Future;
 
 static constexpr int NUM_THREADS = 30;
-static constexpr int JOB_MILLIS = 100;
+static constexpr int JOB_MILLIS = 50;
+static constexpr int NUM_FUTURE_GETS = 2;
 
 template <typename T>
 Function<T> MakeFunc(T t) {
@@ -30,12 +31,16 @@ Function<T> MakeFunc(T t) {
 
 template <typename T>
 void ResolveFuture(int i, shared_ptr<Future<T>> future_ptr) {
-  StatusOr<T> result = future_ptr->Get();
-  if (!result.ok()) {
-    ELOG("ResolveFuture error: " << i << ": " << result.ToString());
-  } else {
-    T value = result.ValueOrDie();
-    ILOG("ResolveFuture success: " << i << ": " << value);
+  for (int j = 0; j < NUM_FUTURE_GETS; j++) {
+    StatusOr<T> result = future_ptr->Get();
+    if (!result.ok()) {
+      ELOG("ResolveFuture error " << (j + 1) << "/" << NUM_FUTURE_GETS << ": "
+                                  << i << ": " << result.ToString());
+    } else {
+      T value = result.ValueOrDie();
+      ILOG("ResolveFuture success " << (j + 1) << "/" << NUM_FUTURE_GETS << ": "
+                                    << i << ": " << value);
+    }
   }
 }
 

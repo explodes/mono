@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <thread>
 
 #include "hoist/status_macros.h"
@@ -18,6 +19,8 @@ using ::Hoist::Status;
 using ::Hoist::StatusOr;
 using std::make_pair;
 using std::make_shared;
+using std::mutex;
+using std::scoped_lock;
 using std::shared_ptr;
 using std::thread;
 
@@ -27,19 +30,31 @@ using Function = ::std::function<T()>;
 template <typename T>
 class Future {
  public:
-  Future() : queue_() {}
+  Future()
+      : mutex_(),
+        complete_(false),
+        queue_(),
+        value_(Status(error::Code::UNAVAILABLE, "Value not yet acquired.")) {}
 
   StatusOr<T> Get() {
-    StatusOr<T> val = std::move(queue_.Get());
-    queue_.Close();
-    return val;
+    {
+      scoped_lock lock(mutex_);
+      if (!complete_) {
+        value_ = std::move(queue_.Get());
+        queue_.Close();
+        complete_ = true;
+      }
+    }
+    return value_;
   }
 
  private:
   template <typename U>
   friend class Executor;
-
+  mutable mutex mutex_;
+  bool complete_;
   Queue<T> queue_;
+  StatusOr<T> value_;
 
   void Set(T &&t) { queue_.Put(std::move(t)); }
 };
