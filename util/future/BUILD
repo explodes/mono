@@ -67,6 +67,7 @@ cc_binary(
     deps = [
         ":function",
         ":queue",
+        "//hoist:init",
         "//hoist:logging",
         "//hoist:status_macros",
         "//hoist:statusor",

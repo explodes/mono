@@ -1,14 +1,16 @@
-
-#include <assert.h> /* assert */
+#include <assert.h>
+#include <unistd.h>
 #include <condition_variable>
 #include <deque>
 #include <functional>
 #include <memory>
-#include <mutex>  // For std::unique_lock
+#include <mutex>
 #include <shared_mutex>
 #include <thread>
 #include <utility>
+#include <vector>
 
+#include "hoist/init.h"
 #include "hoist/logging.h"
 #include "hoist/status_macros.h"
 #include "hoist/statusor.h"
@@ -19,15 +21,18 @@ namespace {
 
 using ::Hoist::StatusOr;
 using std::condition_variable;
+using std::condition_variable_any;
 using std::deque;
 using std::make_pair;
 using std::make_shared;
 using std::mutex;
+using std::scoped_lock;
 using std::shared_lock;
 using std::shared_mutex;
 using std::shared_ptr;
 using std::thread;
 using std::unique_lock;
+using std::vector;
 using ::util::future::Function;
 using ::util::future::Queue;
 
@@ -52,7 +57,7 @@ class Future {
   void Set(T t) {
     assert(!complete_);
     {
-      unique_lock<mutex> lock(mutex_);
+      scoped_lock<mutex> lock(mutex_);
       if (!complete_) {
         t_ = std::move(t);
         complete_ = true;
@@ -68,31 +73,38 @@ class Executor {
   Executor()
       : mutex_(), running_(false), thread_(nullptr), queue_(), condition_() {}
 
-  StatusOr<shared_ptr<Future<T>>> Enqueue(Function<T> &func) {
-    unique_lock lock(mutex_);
+  StatusOr<shared_ptr<Future<T>>> Enqueue(Function<T> &&func) {
+    scoped_lock lock(mutex_);
+    DLOG("Enqueue");
     assert(thread_ != nullptr);
     auto fut = make_shared<Future<T>>();
-    Job job = make_pair(func, fut);
+    Job job = make_pair(std::move(func), fut);
     RETURN_IF_ERROR(queue_.Put(job));
     condition_.notify_one();
-    return fut;
+    return std::move(fut);
   }
 
   void Loop() {
-    unique_lock lock(mutex_);
+    scoped_lock lock(mutex_);
+    DLOG("Loop");
     assert(thread_ == nullptr);
     running_ = true;
     thread_ = new thread(&Executor::RunEventLoop, this);
   };
 
   void Join() {
-    unique_lock lock(mutex_);
-    assert(thread_ != nullptr);
-    assert(running_);
-    running_ = false;
-    queue_.Close();
-    condition_.notify_one();
-    thread_->join();
+    thread *t(nullptr);
+    {
+      scoped_lock lock(mutex_);
+      DLOG("Join");
+      assert(thread_ != nullptr);
+      assert(running_);
+      running_ = false;
+      queue_.Close();
+      condition_.notify_one();
+      t = thread_;
+    }
+    t->join();
   }
 
   ~Executor() { delete thread_; }
@@ -106,6 +118,7 @@ class Executor {
   condition_variable condition_;
 
   void RunEventLoop() {
+    DLOG("RunEventLoop");
     while (running_) {
       DLOG("Loop start");
       unique_lock lock(mutex_);
@@ -113,12 +126,17 @@ class Executor {
       condition_.wait(lock, [=] { return !running_ || !queue_.Empty(); });
       DLOG("Condition end");
       if (running_ && !queue_.Empty()) {
+        DLOG("Get start");
         StatusOr<Job> result = queue_.Get();
+        DLOG("Get end");
         if (!result.ok()) {
+          DLOG("Queue not ok: " << result.ToString());
           return;
         }
         Job job = std::move(result.ValueOrDie());
+        DLOG("Job start");
         job.second->Set(std::move(job.first()));
+        DLOG("Job end");
       }
       DLOG("Loop end");
     }
@@ -128,36 +146,32 @@ class Executor {
 }  // namespace
 
 Function<int> makeFunc(int i) {
-  Function<int> func = [i] {
-    // sleep(1);
+  return [i] {
+    ILOG("func i=" << i);
+    sleep(1);
     return i;
   };
-  return func;
 }
 
 int main() {
+  Hoist::Init();
+
   Executor<int> exec;
   exec.Loop();
 
-  auto func1 = makeFunc(1);
-  auto future1 = exec.Enqueue(func1);
-  int val1 = future1.ValueOrDie()->Get();
-  DLOG("Got=" << val1);
-
-  auto func2 = makeFunc(2);
-  auto future2 = exec.Enqueue(func2);
-  int val2 = future2.ValueOrDie()->Get();
-  DLOG("Got=" << val2);
-
-  auto func3 = makeFunc(3);
-  auto future3 = exec.Enqueue(func3);
-  int val3 = future3.ValueOrDie()->Get();
-  DLOG("Got=" << val3);
-
-  auto func4 = makeFunc(4);
-  auto future4 = exec.Enqueue(func4);
-  int val4 = future4.ValueOrDie()->Get();
-  DLOG("Got=" << val4);
+  // vector<thread> threads;
+  for (int i = 0; i < 20; i++) {
+    auto future = exec.Enqueue(makeFunc(i * i));
+    auto resolve_future = [](int j, StatusOr<shared_ptr<Future<int>>> &future) {
+      DLOG("Thread start: " << j);
+      int val = future.ValueOrDie()->Get();
+      ILOG("Got i=" << j << " val=" << val);
+      DLOG("Thread end: " << j);
+    };
+    thread resolve_future_thread(resolve_future, i, std::ref(future));
+    resolve_future_thread.detach();
+    // threads.push_back(std::move(resolve_future_thread));
+  }
 
   exec.Join();
 }
