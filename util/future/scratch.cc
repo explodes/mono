@@ -7,6 +7,7 @@
 #include "hoist/init.h"
 #include "hoist/logging.h"
 #include "hoist/statusor.h"
+#include "util/future/executor.h"
 #include "util/future/future.h"
 
 using ::Hoist::StatusOr;

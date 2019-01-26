@@ -1,4 +1,17 @@
 cc_library(
+    name = "executor",
+    srcs = [],
+    hdrs = ["executor.h"],
+    deps = [
+        ":future",
+        ":queue",
+        "//hoist:status",
+        "//hoist:status_macros",
+        "//hoist:statusor",
+    ],
+)
+
+cc_library(
     name = "future",
     srcs = [],
     hdrs = ["future.h"],
@@ -38,8 +51,8 @@ cc_binary(
         "-lpthread",
     ],
     deps = [
+        ":executor",
         ":future",
-        ":queue",
         "//hoist:init",
         "//hoist:logging",
         "//hoist:statusor",
