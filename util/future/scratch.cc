@@ -42,12 +42,12 @@ void ResolveFuture(int i, shared_ptr<Future<T>> future_ptr) {
 int main() {
   Hoist::Init();
 
-  Executor<int> exec;
-  exec.Loop();
+  Executor<int> executor;
+  executor.Run();
 
   vector<thread> resolve_threads;
   for (int i = 0; i < NUM_THREADS; i++) {
-    auto enqueue_result = exec.Enqueue(MakeFunc(i * i));
+    auto enqueue_result = executor.Enqueue(MakeFunc(i * i));
     if (!enqueue_result.ok()) {
       ELOG("Enqueue error i=" << i << ": " << enqueue_result.ToString());
       continue;
@@ -59,9 +59,9 @@ int main() {
     resolve_threads.push_back(std::move(resolve_future_thread));
   }
 
-  for (auto &t : resolve_threads) {
-    t.join();
+  for (auto &resolve_thread : resolve_threads) {
+    resolve_thread.join();
   }
 
-  exec.Join();
+  executor.Join();
 }

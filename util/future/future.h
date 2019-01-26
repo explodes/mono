@@ -47,12 +47,12 @@ class Future {
 template <typename T>
 class Executor {
  public:
-  Executor() : running_(false), thread_(nullptr), queue_() {}
+  Executor() : running_(false), thread_(), queue_() {}
 
   StatusOr<shared_ptr<Future<T>>> Enqueue(Function<T> &&func) {
-    if (thread_ == nullptr) {
+    if (!running_) {
       return Status(error::Code::FAILED_PRECONDITION,
-                    "Executor must be started before Enqueing.");
+                    "Executor must be running before Enqueing.");
     }
     shared_ptr<Future<T>> future_ptr = make_shared<Future<T>>();
     Job job = make_pair(std::move(func), future_ptr);
@@ -60,33 +60,31 @@ class Executor {
     return future_ptr;
   }
 
-  Status Loop() {
-    if (thread_ != nullptr) {
+  Status Run() {
+    if (running_) {
       return Status(error::Code::FAILED_PRECONDITION,
-                    "Executor must not already be looping.");
+                    "Executor must not already be running.");
     }
     running_ = true;
-    thread_ = new thread(&Executor::RunEventLoop, this);
+    thread_ = thread(&Executor::RunEventLoop, this);
     return Status::OK;
   };
 
   Status Join() {
-    if (!running_ || thread_ != nullptr) {
+    if (!running_) {
       return Status(error::Code::FAILED_PRECONDITION,
-                    "Executor must not already be looping.");
+                    "Executor must be running before Joining.");
     }
     running_ = false;
     queue_.Close();
-    thread_->join();
+    thread_.join();
     return Status::OK;
   }
-
-  ~Executor() { delete thread_; }
 
  private:
   typedef std::pair<Function<T>, shared_ptr<Future<T>>> Job;
   bool running_;
-  thread *thread_;
+  thread thread_;
   Queue<Job> queue_;
 
   void RunEventLoop() {
