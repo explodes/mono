@@ -10,3 +10,4 @@ GSYMS
 GTAGS
 tmp/
 .vscode
+.idea
