@@ -1,7 +1,13 @@
-module(name = "main", version="")
+module(name = "io_explod_mono", version="")
 
 # -- bazel_dep definitions -- #
+bazel_dep(name = "rules_proto", version = "7.1.0")
+bazel_dep(name = "rules_cc", version = "0.1.4")
+bazel_dep(name = "rules_go", version = "0.55.1")
 
 # -- use_repo_rule statements -- #
+cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension")
+use_repo(cc_configure, "local_config_cc")
 
 # -- repo definitions -- #
+bazel_dep(name = "platforms", version = "1.0.0")

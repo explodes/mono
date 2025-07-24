@@ -1,3 +1,9 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_prefix")
 
-go_prefix("github.com/explodes/mono")
+platform(
+    name = "x64_windows-clang-cl",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+        "@bazel_tools//tools/cpp:clang-cl",
+    ],
+)

@@ -1,7 +1,7 @@
 .vscode/.vs_code_bazel_build/
 bazel-bin
 bazel-genfiles
-bazel-learncpp
+bazel-mono
 bazel-out
 bazel-testlogs
 GPATH

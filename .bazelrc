@@ -1,5 +1,14 @@
 ## BUILD OPTIONS
 
+
+# WINDOWS C++ OPTIONS
+# Rquires the installation of LLVM: https://releases.llvm.org/download.html
+startup --output_user_root=C:/tmp
+startup --windows_enable_symlinks
+build --enable_runfiles
+build --extra_toolchains=@local_config_cc//:cc-toolchain-x64_windows-clang-cl
+build --extra_execution_platforms=//:x64_windows-clang-cl
+
 # c-opts
 build --client_env=CC=gcc
 build --cxxopt='-std=c++17'
